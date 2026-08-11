@@ -183,7 +183,7 @@ class UserController extends Controller
                     'user_id' => $user->id,
                     'wallet_id' => $wallet->id,
                     'asset' => $wallet->asset,
-                    'action' => $action,
+                    'type' => $action,
                     'amount' => $validated['amount'],
                     'balance_before' => $balanceBefore,
                     'balance_after' => $balanceAfter,

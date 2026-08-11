@@ -34,7 +34,7 @@ class AdjustmentHistoryTest extends TestCase
         $this->assertSame($user->id, $history->user_id);
         $this->assertSame($wallet->id, $history->wallet_id);
         $this->assertSame('USDT', $history->asset);
-        $this->assertSame('add', $history->action);
+        $this->assertSame('add', $history->type);
         $this->assertSame('100.00000000', $history->amount);
         $this->assertSame('500.00000000', $history->balance_before);
         $this->assertSame('600.00000000', $history->balance_after);
@@ -61,7 +61,7 @@ class AdjustmentHistoryTest extends TestCase
         $this->assertSame($admin->id, $history->admin_id);
         $this->assertSame($user->id, $history->user_id);
         $this->assertSame($wallet->id, $history->wallet_id);
-        $this->assertSame('deduct', $history->action);
+        $this->assertSame('deduct', $history->type);
         $this->assertSame('100.00000000', $history->amount);
         $this->assertSame('500.00000000', $history->balance_before);
         $this->assertSame('400.00000000', $history->balance_after);

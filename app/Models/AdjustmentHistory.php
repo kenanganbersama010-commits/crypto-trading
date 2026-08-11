@@ -12,7 +12,7 @@ class AdjustmentHistory extends Model
         'user_id',
         'wallet_id',
         'asset',
-        'action',
+        'type',
         'amount',
         'balance_before',
         'balance_after',
