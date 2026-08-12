@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AdjustmentHistoryController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -28,6 +29,8 @@ Route::middleware(['auth', 'verified', 'role:admin'])
         Route::post('/users/{user}/reset-password', [UserController::class, 'resetPassword'])->name('admin.users.reset-password');
         Route::post('/users/{user}/reset-withdrawal-password', [UserController::class, 'resetWithdrawalPassword'])->name('admin.users.reset-withdrawal-password');
         Route::post('/users/{user}/adjust-balance', [UserController::class, 'adjustBalance'])->name('admin.users.adjust-balance');
+
+        Route::get('/adjustment-history', [AdjustmentHistoryController::class, 'index'])->name('admin.adjustment-history.index');
     });
 
 Route::middleware('auth')->group(function () {
