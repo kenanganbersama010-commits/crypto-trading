@@ -69,30 +69,47 @@ class AdjustmentHistoryViewTest extends TestCase
     {
         $admin = User::factory()->create(['role' => 'admin']);
 
-        foreach (range(1, 3) as $i) {
-            $user = User::factory()->create(['role' => 'user']);
-            $wallet = Wallet::create(['user_id' => $user->id, 'asset' => 'USDT', 'balance' => '100.00000000']);
+        $seed = function (int $count) use ($admin) {
+            foreach (range(1, $count) as $i) {
+                $user = User::factory()->create(['role' => 'user']);
+                $wallet = Wallet::create(['user_id' => $user->id, 'asset' => 'USDT', 'balance' => '100.00000000']);
 
-            AdjustmentHistory::create([
-                'admin_id' => $admin->id,
-                'user_id' => $user->id,
-                'wallet_id' => $wallet->id,
-                'asset' => 'USDT',
-                'type' => 'add',
-                'amount' => '10.00000000',
-                'balance_before' => '90.00000000',
-                'balance_after' => '100.00000000',
-                'reason' => 'Test',
-            ]);
-        }
+                AdjustmentHistory::create([
+                    'admin_id' => $admin->id,
+                    'user_id' => $user->id,
+                    'wallet_id' => $wallet->id,
+                    'asset' => 'USDT',
+                    'type' => 'add',
+                    'amount' => '10.00000000',
+                    'balance_before' => '90.00000000',
+                    'balance_after' => '100.00000000',
+                    'reason' => 'Test',
+                ]);
+            }
+        };
 
-        $queryCount = 0;
-        \Illuminate\Support\Facades\DB::listen(function () use (&$queryCount) {
-            $queryCount++;
-        });
+        $countQueries = function () use ($admin) {
+            $queryCount = 0;
+            $listener = function () use (&$queryCount) {
+                $queryCount++;
+            };
 
-        $this->actingAs($admin)->get(route('admin.adjustment-history.index'))->assertOk();
+            \Illuminate\Support\Facades\DB::listen($listener);
+            $this->actingAs($admin)->get(route('admin.adjustment-history.index'))->assertOk();
 
-        $this->assertLessThanOrEqual(3, $queryCount);
+            return $queryCount;
+        };
+
+        // Query count is a handful of fixed-cost aggregate/eager-load queries
+        // (page items, user eager-load, admin eager-load, paginator total count,
+        // add-count, deduct-count, distinct asset list) — it must NOT scale with
+        // the number of history rows, which is what an N+1 would look like.
+        $seed(3);
+        $queriesWithFewRows = $countQueries();
+
+        $seed(5);
+        $queriesWithMoreRows = $countQueries();
+
+        $this->assertSame($queriesWithFewRows, $queriesWithMoreRows);
     }
 }
