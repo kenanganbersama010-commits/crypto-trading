@@ -162,7 +162,7 @@ class DepositDetailTest extends TestCase
         $this->assertSame(0, \App\Models\AdjustmentHistory::count());
     }
 
-    public function test_no_approve_or_reject_buttons_present(): void
+    public function test_no_reject_button_present(): void
     {
         $admin = User::factory()->create(['role' => 'admin']);
         $user = User::factory()->create(['role' => 'user']);
@@ -171,8 +171,33 @@ class DepositDetailTest extends TestCase
         $response = $this->actingAs($admin)->get(route('admin.deposits.show', $deposit));
 
         $response->assertOk();
-        $response->assertDontSee('Approve');
         $response->assertDontSee('Reject');
+    }
+
+    public function test_approve_button_shown_only_for_pending_deposit(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $user = User::factory()->create(['role' => 'user']);
+        $pending = $this->makeDeposit($user, ['status' => 'pending']);
+        $approved = $this->makeDeposit($user, [
+            'status' => 'approved',
+            'reviewed_by' => $admin->id,
+            'reviewed_at' => now(),
+        ]);
+        $rejected = $this->makeDeposit($user, [
+            'status' => 'rejected',
+            'reviewed_by' => $admin->id,
+            'reviewed_at' => now(),
+        ]);
+
+        $this->actingAs($admin)->get(route('admin.deposits.show', $pending))
+            ->assertOk()->assertSee('Approve Deposit');
+
+        $this->actingAs($admin)->get(route('admin.deposits.show', $approved))
+            ->assertOk()->assertDontSee('Approve Deposit');
+
+        $this->actingAs($admin)->get(route('admin.deposits.show', $rejected))
+            ->assertOk()->assertDontSee('Approve Deposit');
     }
 
     public function test_deposit_detail_data_is_html_escaped(): void

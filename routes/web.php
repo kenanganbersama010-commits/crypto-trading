@@ -35,6 +35,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])
 
         Route::get('/deposits', [DepositController::class, 'index'])->name('admin.deposits.index');
         Route::get('/deposits/{deposit}', [DepositController::class, 'show'])->name('admin.deposits.show');
+        Route::post('/deposits/{deposit}/approve', [DepositController::class, 'approve'])->name('admin.deposits.approve');
     });
 
 Route::middleware('auth')->group(function () {
