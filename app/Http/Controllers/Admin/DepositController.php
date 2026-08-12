@@ -17,7 +17,7 @@ class DepositController extends Controller
 
     public function show(Deposit $deposit): View
     {
-        $deposit->load('user');
+        $deposit->load(['user', 'reviewer']);
 
         return view('admin.deposits.show', compact('deposit'));
     }

@@ -82,7 +82,8 @@ class DepositRouteTest extends TestCase
 
         $response->assertOk();
         $response->assertSee($user->name);
-        $response->assertSee('bank_transfer');
+        // Method is formatted for display ("Bank Transfer"), the raw DB value is not shown verbatim.
+        $response->assertSee('Bank Transfer');
         $response->assertSee('USDT');
     }
 
