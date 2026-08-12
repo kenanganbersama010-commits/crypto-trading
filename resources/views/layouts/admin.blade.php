@@ -57,7 +57,7 @@
                     <div>
                         <x-nav-section title="Finance" />
                         <div class="space-y-1">
-                            <x-nav-item href="#" icon="deposits">Deposits</x-nav-item>
+                            <x-nav-item href="{{ route('admin.deposits.index') }}" icon="deposits" :active="request()->routeIs('admin.deposits.*')">Deposits</x-nav-item>
                             <x-nav-item href="#" icon="withdrawals">Withdrawals</x-nav-item>
                             <x-nav-item href="{{ route('admin.adjustment-history.index') }}" icon="transactions" :active="request()->routeIs('admin.adjustment-history.*')">Adjustment History</x-nav-item>
                         </div>
