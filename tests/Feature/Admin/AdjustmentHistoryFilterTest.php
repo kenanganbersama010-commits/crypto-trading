@@ -227,7 +227,23 @@ class AdjustmentHistoryFilterTest extends TestCase
         ]));
 
         $response->assertOk();
-        $response->assertSee('From date must not be after To date.');
+        $response->assertSee('Invalid date filter.');
+        $this->assertCount(1, $response->viewData('adjustments'));
+    }
+
+    public function test_malformed_date_string_is_rejected_with_validation_message_not_a_query_error(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $user = User::factory()->create(['role' => 'user']);
+        $wallet = Wallet::create(['user_id' => $user->id, 'asset' => 'USDT', 'balance' => '100']);
+
+        $this->makeAdjustment($admin, $user, $wallet, 'add', 'USDT', 'x', now());
+
+        $response = $this->actingAs($admin)->get(route('admin.adjustment-history.index', ['from_date' => 'not-a-date']));
+
+        $response->assertOk();
+        $response->assertSee('Invalid date filter.');
+        // The malformed date must not silently narrow results without feedback.
         $this->assertCount(1, $response->viewData('adjustments'));
     }
 

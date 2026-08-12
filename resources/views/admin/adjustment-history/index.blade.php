@@ -86,8 +86,8 @@
                     </div>
                 </div>
 
-                @if ($dateRangeInvalid)
-                    <p class="mt-2 text-sm text-red-600">From date must not be after To date. Date filter was not applied.</p>
+                @if ($dateFilterInvalid)
+                    <p class="mt-2 text-sm text-red-600">Invalid date filter. Please use a valid date and make sure From date is not after To date. The date filter was not applied.</p>
                 @endif
 
                 <div class="mt-4 flex gap-2">

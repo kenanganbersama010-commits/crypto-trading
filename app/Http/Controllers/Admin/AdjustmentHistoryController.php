@@ -20,9 +20,15 @@ class AdjustmentHistoryController extends Controller
         $type = $request->input('type');
         $type = in_array($type, ['add', 'deduct'], true) ? $type : null;
 
-        $fromDate = $this->parseDate($request->input('from_date'));
-        $toDate = $this->parseDate($request->input('to_date'));
+        $fromDateInput = $request->input('from_date');
+        $toDateInput = $request->input('to_date');
+
+        $fromDate = $this->parseDate($fromDateInput);
+        $toDate = $this->parseDate($toDateInput);
+
         $dateRangeInvalid = $fromDate && $toDate && $fromDate->gt($toDate);
+        $dateFormatInvalid = ($fromDateInput && ! $fromDate) || ($toDateInput && ! $toDate);
+        $dateFilterInvalid = $dateRangeInvalid || $dateFormatInvalid;
 
         $applyFilters = function () use ($search, $asset, $type, $fromDate, $toDate, $dateRangeInvalid) {
             return AdjustmentHistory::query()
@@ -56,7 +62,7 @@ class AdjustmentHistoryController extends Controller
             'addCount',
             'deductCount',
             'assets',
-            'dateRangeInvalid',
+            'dateFilterInvalid',
         ));
     }
 
