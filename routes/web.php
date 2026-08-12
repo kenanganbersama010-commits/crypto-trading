@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AdjustmentHistoryController;
+use App\Http\Controllers\Admin\DepositController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -31,6 +32,9 @@ Route::middleware(['auth', 'verified', 'role:admin'])
         Route::post('/users/{user}/adjust-balance', [UserController::class, 'adjustBalance'])->name('admin.users.adjust-balance');
 
         Route::get('/adjustment-history', [AdjustmentHistoryController::class, 'index'])->name('admin.adjustment-history.index');
+
+        Route::get('/deposits', [DepositController::class, 'index'])->name('admin.deposits.index');
+        Route::get('/deposits/{deposit}', [DepositController::class, 'show'])->name('admin.deposits.show');
     });
 
 Route::middleware('auth')->group(function () {
