@@ -1,7 +1,5 @@
 @extends('layouts.admin')
 
-@use('Illuminate\Support\Facades\Storage')
-
 @section('title', 'Deposits')
 
 @section('content')
@@ -62,7 +60,7 @@
                                                     x-on:click="$dispatch('open-modal', 'deposit-proof-{{ $deposit->id }}')"
                                                 >
                                                     <img
-                                                        src="{{ Storage::disk('public')->url($deposit->proof_image) }}"
+                                                        src="{{ $deposit->proof_image_url }}"
                                                         alt="Proof of deposit #{{ $deposit->id }}"
                                                         class="h-10 w-10 rounded border border-gray-200 object-cover"
                                                     >
@@ -115,7 +113,7 @@
                                                     x-on:click="$dispatch('open-modal', 'deposit-proof-{{ $deposit->id }}')"
                                                 >
                                                     <img
-                                                        src="{{ Storage::disk('public')->url($deposit->proof_image) }}"
+                                                        src="{{ $deposit->proof_image_url }}"
                                                         alt="Proof of deposit #{{ $deposit->id }}"
                                                         class="h-10 w-10 rounded border border-gray-200 object-cover"
                                                     >
@@ -143,7 +141,7 @@
                             <p class="mt-1 text-sm text-gray-600">{{ $deposit->user->name }} &middot; {{ $deposit->asset }} {{ rtrim(rtrim($deposit->amount, '0'), '.') }}</p>
 
                             <img
-                                src="{{ Storage::disk('public')->url($deposit->proof_image) }}"
+                                src="{{ $deposit->proof_image_url }}"
                                 alt="Proof of deposit #{{ $deposit->id }}"
                                 class="mt-4 max-h-[70vh] w-full rounded border border-gray-200 object-contain"
                             >

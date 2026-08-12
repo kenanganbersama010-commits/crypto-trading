@@ -135,4 +135,32 @@ class DepositTest extends TestCase
             'rejection_reason',
         ], $model->getFillable());
     }
+
+    public function test_proof_image_url_accessor_returns_null_when_no_proof_image(): void
+    {
+        $user = User::factory()->create(['role' => 'user']);
+        $deposit = Deposit::create([
+            'user_id' => $user->id,
+            'method' => 'bank_transfer',
+            'asset' => 'USDT',
+            'amount' => '100',
+            'proof_image' => null,
+        ]);
+
+        $this->assertNull($deposit->proof_image_url);
+    }
+
+    public function test_proof_image_url_accessor_resolves_to_public_disk_url(): void
+    {
+        $user = User::factory()->create(['role' => 'user']);
+        $deposit = Deposit::create([
+            'user_id' => $user->id,
+            'method' => 'bank_transfer',
+            'asset' => 'USDT',
+            'amount' => '100',
+            'proof_image' => 'deposits/proofs/sample.jpg',
+        ]);
+
+        $this->assertStringContainsString('storage/deposits/proofs/sample.jpg', $deposit->proof_image_url);
+    }
 }

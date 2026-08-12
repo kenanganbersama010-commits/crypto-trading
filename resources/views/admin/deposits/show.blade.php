@@ -1,7 +1,5 @@
 @extends('layouts.admin')
 
-@use('Illuminate\Support\Facades\Storage')
-
 @section('title', 'Deposit Details')
 
 @section('content')
@@ -86,9 +84,9 @@
         <div class="mt-4 rounded-lg border border-gray-200 bg-white p-5">
             <h3 class="text-sm font-semibold text-gray-900">Payment Proof</h3>
 
-            @if ($deposit->proof_image)
+            @if ($deposit->proof_image_url)
                 <img
-                    src="{{ Storage::disk('public')->url($deposit->proof_image) }}"
+                    src="{{ $deposit->proof_image_url }}"
                     alt="Proof of deposit #{{ $deposit->id }}"
                     class="mt-4 max-h-[60vh] w-full max-w-md rounded border border-gray-200 object-contain"
                 >
