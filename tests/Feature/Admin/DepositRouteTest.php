@@ -21,7 +21,7 @@ class DepositRouteTest extends TestCase
         $response = $this->actingAs($admin)->get(route('admin.deposits.index'));
 
         $response->assertOk();
-        $response->assertSee('Deposits');
+        $response->assertSee('Deposit');
         $response->assertSee($user->name);
     }
 
