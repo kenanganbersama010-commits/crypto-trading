@@ -7,6 +7,7 @@ use App\Models\AdjustmentHistory;
 use App\Models\Deposit;
 use App\Models\Wallet;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
@@ -89,5 +90,43 @@ class DepositController extends Controller
         }
 
         return redirect()->route('admin.deposits.show', $deposit)->with('status', 'deposit-approved');
+    }
+
+    public function reject(Request $request, Deposit $deposit): RedirectResponse
+    {
+        $validated = $request->validateWithBag('rejectDeposit', [
+            'rejection_reason' => ['required', 'string', 'max:500'],
+        ]);
+
+        $adminId = auth()->id();
+
+        try {
+            $result = DB::transaction(function () use ($deposit, $adminId, $validated) {
+                $locked = Deposit::query()->lockForUpdate()->findOrFail($deposit->id);
+
+                if ($locked->status !== 'pending') {
+                    return 'already-processed';
+                }
+
+                $locked->update([
+                    'status' => 'rejected',
+                    'reviewed_by' => $adminId,
+                    'reviewed_at' => now(),
+                    'rejection_reason' => $validated['rejection_reason'],
+                ]);
+
+                return 'rejected';
+            });
+        } catch (Throwable $e) {
+            Log::error('Admin deposit rejection failed.', ['admin_id' => $adminId, 'deposit_id' => $deposit->id, 'exception' => $e->getMessage()]);
+
+            return redirect()->route('admin.deposits.show', $deposit)->with('error', 'deposit-reject-failed');
+        }
+
+        if ($result === 'already-processed') {
+            return redirect()->route('admin.deposits.show', $deposit)->with('error', 'deposit-already-processed');
+        }
+
+        return redirect()->route('admin.deposits.show', $deposit)->with('status', 'deposit-rejected');
     }
 }

@@ -31,12 +31,16 @@
 
             @if (session('status') === 'deposit-approved')
                 <x-auth-session-status class="mb-4" status="Deposit approved successfully." />
+            @elseif (session('status') === 'deposit-rejected')
+                <x-auth-session-status class="mb-4" status="Deposit rejected successfully." />
             @endif
 
             @if (session('error') === 'deposit-already-processed')
                 <p class="mb-4 text-sm font-medium text-red-600">This deposit has already been processed.</p>
             @elseif (session('error') === 'deposit-approve-failed')
                 <p class="mb-4 text-sm font-medium text-red-600">Unable to approve deposit.</p>
+            @elseif (session('error') === 'deposit-reject-failed')
+                <p class="mb-4 text-sm font-medium text-red-600">Unable to reject deposit.</p>
             @endif
 
         <!-- Deposit Information -->
@@ -84,6 +88,14 @@
                         class="rounded-md bg-violet-600 px-4 py-2 text-sm font-medium text-white"
                     >
                         Approve Deposit
+                    </button>
+                    <button
+                        type="button"
+                        x-data=""
+                        x-on:click="$dispatch('open-modal', 'reject-deposit')"
+                        class="rounded-md border border-red-300 px-4 py-2 text-sm font-medium text-red-600"
+                    >
+                        Reject Deposit
                     </button>
                 </div>
             </div>
@@ -201,6 +213,75 @@
                         >
                             <span x-show="!loading">Approve Deposit</span>
                             <span x-show="loading" style="display: none;">Approving...</span>
+                        </button>
+                    </div>
+                </form>
+            </x-modal>
+
+            <x-modal name="reject-deposit" :show="$errors->rejectDeposit->isNotEmpty()" focusable>
+                <form
+                    method="post"
+                    action="{{ route('admin.deposits.reject', $deposit) }}"
+                    class="p-6"
+                    x-data="{ reason: @js(old('rejection_reason', '')) }"
+                    x-effect="! show && (reason = '')"
+                >
+                    @csrf
+
+                    <h2 class="text-base font-semibold text-gray-900">Reject Deposit</h2>
+
+                    <p class="mt-2 text-sm text-gray-600">
+                        Are you sure you want to reject this deposit? The amount will not be added to the user's wallet.
+                    </p>
+
+                    <dl class="mt-4 space-y-3">
+                        <div>
+                            <dt class="text-xs text-gray-500">User</dt>
+                            <dd class="mt-0.5 text-sm font-medium text-gray-900">{{ $deposit->user->name }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-xs text-gray-500">Method</dt>
+                            <dd class="mt-0.5 text-sm font-medium text-gray-900">{{ ucwords(str_replace('_', ' ', $deposit->method)) }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-xs text-gray-500">Asset</dt>
+                            <dd class="mt-0.5 text-sm font-medium text-gray-900">{{ $deposit->asset }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-xs text-gray-500">Amount</dt>
+                            <dd class="mt-0.5 text-sm font-medium text-gray-900">{{ rtrim(rtrim($deposit->amount, '0'), '.') }} {{ $deposit->asset }}</dd>
+                        </div>
+                    </dl>
+
+                    <div class="mt-4">
+                        <x-input-label for="rejection_reason" value="Rejection Reason" />
+                        <textarea
+                            id="rejection_reason"
+                            name="rejection_reason"
+                            x-model="reason"
+                            rows="3"
+                            maxlength="500"
+                            placeholder="Payment proof is invalid."
+                            class="mt-1 block w-full rounded-lg border-gray-300 text-sm shadow-sm focus:border-violet-500 focus:ring-violet-500"
+                        ></textarea>
+                        <x-input-error :messages="$errors->rejectDeposit->get('rejection_reason')" class="mt-2" />
+                    </div>
+
+                    <div class="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                        <button
+                            type="button"
+                            x-on:click="$dispatch('close')"
+                            class="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="submit"
+                            :disabled="loading || ! reason.trim()"
+                            class="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+                        >
+                            <span x-show="!loading">Reject Deposit</span>
+                            <span x-show="loading" style="display: none;">Rejecting...</span>
                         </button>
                     </div>
                 </form>
