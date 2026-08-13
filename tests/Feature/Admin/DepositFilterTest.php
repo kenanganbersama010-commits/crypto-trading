@@ -162,7 +162,7 @@ class DepositFilterTest extends TestCase
         $response = $this->actingAs($admin)->get(route('admin.deposits.index', ['search' => 'no-such-keyword-xyz']));
 
         $response->assertOk();
-        $response->assertSee('No deposits match your current filters.');
+        $response->assertSee('Tidak ada data deposit yang sesuai dengan filter.');
     }
 
     public function test_pagination_returns_second_page(): void

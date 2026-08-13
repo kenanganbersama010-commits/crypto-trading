@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Deposits')
+@section('title', 'Deposit')
 
 @section('content')
     @php
@@ -9,12 +9,17 @@
             'rejected' => 'text-red-600',
             default => 'text-gray-500',
         };
+        $statusLabel = fn ($status) => match (strtolower($status)) {
+            'approved' => 'Disetujui',
+            'rejected' => 'Ditolak',
+            default => 'Menunggu',
+        };
     @endphp
 
     <div class="mx-auto max-w-7xl">
         <div class="mb-6">
-            <h2 class="text-xl font-semibold tracking-tight text-gray-900">Deposits</h2>
-            <p class="mt-1 text-sm text-gray-500">Review and monitor user deposit submissions.</p>
+            <h2 class="text-xl font-semibold tracking-tight text-gray-900">Deposit</h2>
+            <p class="mt-1 text-sm text-gray-500">Tinjau dan pantau pengajuan deposit pengguna.</p>
         </div>
 
         <div
@@ -25,13 +30,13 @@
             <form method="GET" action="{{ route('admin.deposits.index') }}" class="space-y-4">
                 <!-- Search Card -->
                 <div class="rounded-lg border border-gray-200 bg-white p-4">
-                    <label for="search" class="sr-only">Search deposits</label>
+                    <label for="search" class="sr-only">Cari deposit</label>
                     <input
                         type="text"
                         id="search"
                         name="search"
                         value="{{ request('search') }}"
-                        placeholder="Search by deposit ID, user name, or email..."
+                        placeholder="Cari berdasarkan ID deposit, nama pengguna, atau email..."
                         class="block w-full rounded-md border-gray-300 text-sm text-gray-900 focus:border-violet-500 focus:ring-violet-500"
                     >
                 </div>
@@ -46,21 +51,21 @@
                                 name="status"
                                 class="mt-1 block w-full rounded-md border-gray-300 text-sm text-gray-900 focus:border-violet-500 focus:ring-violet-500"
                             >
-                                <option value="">All</option>
-                                <option value="pending" @selected(request('status') === 'pending')>Pending</option>
-                                <option value="approved" @selected(request('status') === 'approved')>Approved</option>
-                                <option value="rejected" @selected(request('status') === 'rejected')>Rejected</option>
+                                <option value="">Semua</option>
+                                <option value="pending" @selected(request('status') === 'pending')>Menunggu</option>
+                                <option value="approved" @selected(request('status') === 'approved')>Disetujui</option>
+                                <option value="rejected" @selected(request('status') === 'rejected')>Ditolak</option>
                             </select>
                         </div>
 
                         <div>
-                            <label for="method" class="block text-xs font-medium text-gray-500">Method</label>
+                            <label for="method" class="block text-xs font-medium text-gray-500">Metode</label>
                             <select
                                 id="method"
                                 name="method"
                                 class="mt-1 block w-full rounded-md border-gray-300 text-sm text-gray-900 focus:border-violet-500 focus:ring-violet-500"
                             >
-                                <option value="">All</option>
+                                <option value="">Semua</option>
                                 @foreach ($methods as $methodOption)
                                     <option value="{{ $methodOption }}" @selected(request('method') === $methodOption)>
                                         {{ ucwords(str_replace('_', ' ', $methodOption)) }}
@@ -70,13 +75,13 @@
                         </div>
 
                         <div>
-                            <label for="asset" class="block text-xs font-medium text-gray-500">Asset</label>
+                            <label for="asset" class="block text-xs font-medium text-gray-500">Aset</label>
                             <select
                                 id="asset"
                                 name="asset"
                                 class="mt-1 block w-full rounded-md border-gray-300 text-sm text-gray-900 focus:border-violet-500 focus:ring-violet-500"
                             >
-                                <option value="">All</option>
+                                <option value="">Semua</option>
                                 @foreach ($assets as $assetOption)
                                     <option value="{{ $assetOption }}" @selected(request('asset') === $assetOption)>{{ $assetOption }}</option>
                                 @endforeach
@@ -85,7 +90,7 @@
 
                         <div class="flex gap-2">
                             <button type="submit" class="rounded-md bg-violet-600 px-4 py-2 text-sm font-medium text-white">
-                                Apply Filters
+                                Terapkan Filter
                             </button>
 
                             @if (request()->hasAny(['search', 'status', 'method', 'asset']))
@@ -102,9 +107,9 @@
                 @if ($deposits->isEmpty())
                     <p class="px-5 py-8 text-center text-sm text-gray-500">
                         @if (request()->hasAny(['search', 'status', 'method', 'asset']))
-                            No deposits match your current filters.
+                            Tidak ada data deposit yang sesuai dengan filter.
                         @else
-                            No deposits found.
+                            Data deposit tidak ditemukan.
                         @endif
                     </p>
                 @else
@@ -113,14 +118,14 @@
                         <table class="w-full">
                             <thead>
                                 <tr class="border-b border-gray-100">
-                                    <th class="px-5 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-gray-500">User</th>
-                                    <th class="px-5 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-gray-500">Method</th>
-                                    <th class="px-5 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-gray-500">Asset</th>
-                                    <th class="px-5 py-2.5 text-right text-xs font-medium uppercase tracking-wide text-gray-500">Amount</th>
+                                    <th class="px-5 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-gray-500">Pengguna</th>
+                                    <th class="px-5 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-gray-500">Metode</th>
+                                    <th class="px-5 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-gray-500">Aset</th>
+                                    <th class="px-5 py-2.5 text-right text-xs font-medium uppercase tracking-wide text-gray-500">Nominal</th>
                                     <th class="px-5 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-gray-500">Status</th>
-                                    <th class="px-5 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-gray-500">Submitted</th>
-                                    <th class="px-5 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-gray-500">Proof</th>
-                                    <th class="px-5 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-gray-500">Action</th>
+                                    <th class="px-5 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-gray-500">Diajukan Pada</th>
+                                    <th class="px-5 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-gray-500">Bukti</th>
+                                    <th class="px-5 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-gray-500">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -133,7 +138,7 @@
                                         <td class="px-5 py-3 text-sm text-gray-700">{{ ucwords(str_replace('_', ' ', $deposit->method)) }}</td>
                                         <td class="px-5 py-3 text-sm text-gray-700">{{ $deposit->asset }}</td>
                                         <td class="px-5 py-3 text-right text-sm text-gray-700">{{ rtrim(rtrim($deposit->amount, '0'), '.') }}</td>
-                                        <td class="px-5 py-3 text-sm font-medium {{ $statusColor($deposit->status) }}">{{ ucfirst($deposit->status) }}</td>
+                                        <td class="px-5 py-3 text-sm font-medium {{ $statusColor($deposit->status) }}">{{ $statusLabel($deposit->status) }}</td>
                                         <td class="px-5 py-3 text-sm text-gray-500">{{ $deposit->created_at->format('d M Y H:i') }}</td>
                                         <td class="px-5 py-3 text-sm text-gray-700">
                                             @if ($deposit->proof_image)
@@ -144,16 +149,16 @@
                                                 >
                                                     <img
                                                         src="{{ $deposit->proof_image_url }}"
-                                                        alt="Proof of deposit #{{ $deposit->id }}"
+                                                        alt="Bukti deposit #{{ $deposit->id }}"
                                                         class="h-10 w-10 rounded border border-gray-200 object-cover"
                                                     >
                                                 </button>
                                             @else
-                                                <span class="text-gray-400">No proof</span>
+                                                <span class="text-gray-400">Tidak ada bukti</span>
                                             @endif
                                         </td>
                                         <td class="px-5 py-3 text-sm">
-                                            <a href="{{ route('admin.deposits.show', $deposit) }}" class="font-medium text-violet-600">View</a>
+                                            <a href="{{ route('admin.deposits.show', $deposit) }}" class="font-medium text-violet-600">Lihat Detail</a>
                                         </td>
                                     </tr>
                                 @endforeach
@@ -167,27 +172,27 @@
                             <div class="px-5 py-4">
                                 <div class="flex items-center justify-between gap-3">
                                     <span class="truncate text-sm font-medium text-gray-900">{{ $deposit->user->name }}</span>
-                                    <span class="text-sm font-medium {{ $statusColor($deposit->status) }}">{{ ucfirst($deposit->status) }}</span>
+                                    <span class="text-sm font-medium {{ $statusColor($deposit->status) }}">{{ $statusLabel($deposit->status) }}</span>
                                 </div>
                                 <dl class="mt-2 space-y-1.5">
                                     <div class="flex items-center justify-between">
-                                        <dt class="text-xs text-gray-500">Method</dt>
+                                        <dt class="text-xs text-gray-500">Metode</dt>
                                         <dd class="text-sm text-gray-700">{{ ucwords(str_replace('_', ' ', $deposit->method)) }}</dd>
                                     </div>
                                     <div class="flex items-center justify-between">
-                                        <dt class="text-xs text-gray-500">Asset</dt>
+                                        <dt class="text-xs text-gray-500">Aset</dt>
                                         <dd class="text-sm text-gray-700">{{ $deposit->asset }}</dd>
                                     </div>
                                     <div class="flex items-center justify-between">
-                                        <dt class="text-xs text-gray-500">Amount</dt>
+                                        <dt class="text-xs text-gray-500">Nominal</dt>
                                         <dd class="text-sm text-gray-700">{{ rtrim(rtrim($deposit->amount, '0'), '.') }}</dd>
                                     </div>
                                     <div class="flex items-center justify-between">
-                                        <dt class="text-xs text-gray-500">Submitted</dt>
+                                        <dt class="text-xs text-gray-500">Diajukan Pada</dt>
                                         <dd class="text-sm text-gray-500">{{ $deposit->created_at->format('d M Y H:i') }}</dd>
                                     </div>
                                     <div class="flex items-center justify-between">
-                                        <dt class="text-xs text-gray-500">Proof</dt>
+                                        <dt class="text-xs text-gray-500">Bukti</dt>
                                         <dd class="text-sm text-gray-700">
                                             @if ($deposit->proof_image)
                                                 <button
@@ -197,18 +202,18 @@
                                                 >
                                                     <img
                                                         src="{{ $deposit->proof_image_url }}"
-                                                        alt="Proof of deposit #{{ $deposit->id }}"
+                                                        alt="Bukti deposit #{{ $deposit->id }}"
                                                         class="h-10 w-10 rounded border border-gray-200 object-cover"
                                                     >
                                                 </button>
                                             @else
-                                                <span class="text-gray-400">No proof</span>
+                                                <span class="text-gray-400">Tidak ada bukti</span>
                                             @endif
                                         </dd>
                                     </div>
                                 </dl>
                                 <div class="mt-3 border-t border-gray-100 pt-3">
-                                    <a href="{{ route('admin.deposits.show', $deposit) }}" class="text-sm font-medium text-violet-600">View</a>
+                                    <a href="{{ route('admin.deposits.show', $deposit) }}" class="text-sm font-medium text-violet-600">Lihat Detail</a>
                                 </div>
                             </div>
                         @endforeach
@@ -218,7 +223,7 @@
 
             @if ($deposits->isNotEmpty())
                 <div class="mt-6">
-                    {{ $deposits->links() }}
+                    {{ $deposits->links('admin.deposits.partials.pagination-id') }}
                 </div>
             @endif
 
@@ -226,12 +231,12 @@
                 @if ($deposit->proof_image)
                     <x-modal :name="'deposit-proof-'.$deposit->id" max-width="lg">
                         <div class="p-6">
-                            <h2 class="text-base font-semibold text-gray-900">Proof of Deposit</h2>
+                            <h2 class="text-base font-semibold text-gray-900">Bukti Deposit</h2>
                             <p class="mt-1 text-sm text-gray-600">{{ $deposit->user->name }} &middot; {{ $deposit->asset }} {{ rtrim(rtrim($deposit->amount, '0'), '.') }}</p>
 
                             <img
                                 src="{{ $deposit->proof_image_url }}"
-                                alt="Proof of deposit #{{ $deposit->id }}"
+                                alt="Bukti deposit #{{ $deposit->id }}"
                                 class="mt-4 max-h-[70vh] w-full rounded border border-gray-200 object-contain"
                             >
 
@@ -241,7 +246,7 @@
                                     x-on:click="$dispatch('close')"
                                     class="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700"
                                 >
-                                    Close
+                                    Tutup
                                 </button>
                             </div>
                         </div>
@@ -259,10 +264,10 @@
                 class="fixed inset-0 z-[60] flex items-center justify-center gap-2 bg-white/60 backdrop-blur-sm"
                 role="status"
                 aria-live="polite"
-                aria-label="Loading"
+                aria-label="Memuat"
             >
                 <div class="h-6 w-6 animate-spin rounded-full border-2 border-gray-300 border-t-violet-600"></div>
-                <span class="text-sm text-gray-600">Loading...</span>
+                <span class="text-sm text-gray-600">Memuat...</span>
             </div>
         </div>
     </div>

@@ -30,8 +30,8 @@ class DepositDetailTest extends TestCase
         $response = $this->actingAs($admin)->get(route('admin.deposits.show', $deposit));
 
         $response->assertOk();
-        $response->assertSee('Pending');
-        $response->assertSee('Not reviewed yet.');
+        $response->assertSee('Menunggu');
+        $response->assertSee('Belum ditinjau.');
     }
 
     public function test_approved_deposit_shows_reviewer_and_reviewed_at(): void
@@ -48,7 +48,7 @@ class DepositDetailTest extends TestCase
         $response = $this->actingAs($viewingAdmin)->get(route('admin.deposits.show', $deposit));
 
         $response->assertOk();
-        $response->assertSee('Approved');
+        $response->assertSee('Disetujui');
         $response->assertSee('Admin Reviewer');
         $response->assertSee($deposit->fresh()->reviewed_at->format('d M Y'));
     }
@@ -67,7 +67,7 @@ class DepositDetailTest extends TestCase
         $response = $this->actingAs($reviewingAdmin)->get(route('admin.deposits.show', $deposit));
 
         $response->assertOk();
-        $response->assertSee('Rejected');
+        $response->assertSee('Ditolak');
         $response->assertSee('Admin Reviewer');
         $response->assertSee('Proof image unreadable');
     }
@@ -81,7 +81,7 @@ class DepositDetailTest extends TestCase
         $response = $this->actingAs($admin)->get(route('admin.deposits.show', $deposit));
 
         $response->assertOk();
-        $response->assertSee('Not reviewed yet.');
+        $response->assertSee('Belum ditinjau.');
     }
 
     public function test_deposit_with_proof_image_renders_it(): void
@@ -93,7 +93,7 @@ class DepositDetailTest extends TestCase
         $response = $this->actingAs($admin)->get(route('admin.deposits.show', $deposit));
 
         $response->assertOk();
-        $response->assertDontSee('No payment proof available.');
+        $response->assertDontSee('Bukti pembayaran tidak tersedia.');
         $response->assertSee('storage/deposits/proofs/sample.jpg', false);
     }
 
@@ -106,7 +106,7 @@ class DepositDetailTest extends TestCase
         $response = $this->actingAs($admin)->get(route('admin.deposits.show', $deposit));
 
         $response->assertOk();
-        $response->assertSee('No payment proof available.');
+        $response->assertSee('Bukti pembayaran tidak tersedia.');
     }
 
     public function test_view_user_link_points_to_user_detail_route(): void
@@ -179,13 +179,13 @@ class DepositDetailTest extends TestCase
         ]);
 
         $this->actingAs($admin)->get(route('admin.deposits.show', $pending))
-            ->assertOk()->assertSee('Approve Deposit');
+            ->assertOk()->assertSee('Setujui Deposit');
 
         $this->actingAs($admin)->get(route('admin.deposits.show', $approved))
-            ->assertOk()->assertDontSee('Approve Deposit');
+            ->assertOk()->assertDontSee('Setujui Deposit');
 
         $this->actingAs($admin)->get(route('admin.deposits.show', $rejected))
-            ->assertOk()->assertDontSee('Approve Deposit');
+            ->assertOk()->assertDontSee('Setujui Deposit');
     }
 
     public function test_reject_button_shown_only_for_pending_deposit(): void
@@ -205,13 +205,13 @@ class DepositDetailTest extends TestCase
         ]);
 
         $this->actingAs($admin)->get(route('admin.deposits.show', $pending))
-            ->assertOk()->assertSee('Reject Deposit');
+            ->assertOk()->assertSee('Tolak Deposit');
 
         $this->actingAs($admin)->get(route('admin.deposits.show', $approved))
-            ->assertOk()->assertDontSee('Reject Deposit');
+            ->assertOk()->assertDontSee('Tolak Deposit');
 
         $this->actingAs($admin)->get(route('admin.deposits.show', $rejected))
-            ->assertOk()->assertDontSee('Reject Deposit');
+            ->assertOk()->assertDontSee('Tolak Deposit');
     }
 
     public function test_deposit_detail_data_is_html_escaped(): void

@@ -31,7 +31,7 @@ class DepositListUiTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('text-gray-500', false);
-        $response->assertSee('Pending');
+        $response->assertSee('Menunggu');
     }
 
     public function test_approved_status_is_displayed(): void
@@ -43,7 +43,7 @@ class DepositListUiTest extends TestCase
         $response = $this->actingAs($admin)->get(route('admin.deposits.index'));
 
         $response->assertOk();
-        $response->assertSee('Approved');
+        $response->assertSee('Disetujui');
     }
 
     public function test_rejected_status_renders_with_negative_text_styling(): void
@@ -56,7 +56,7 @@ class DepositListUiTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('text-red-600', false);
-        $response->assertSee('Rejected');
+        $response->assertSee('Ditolak');
     }
 
     public function test_deposit_without_proof_shows_no_proof_text(): void
@@ -68,7 +68,7 @@ class DepositListUiTest extends TestCase
         $response = $this->actingAs($admin)->get(route('admin.deposits.index'));
 
         $response->assertOk();
-        $response->assertSee('No proof');
+        $response->assertSee('Tidak ada bukti');
     }
 
     public function test_deposit_with_proof_shows_thumbnail_and_preview_modal(): void
@@ -80,7 +80,7 @@ class DepositListUiTest extends TestCase
         $response = $this->actingAs($admin)->get(route('admin.deposits.index'));
 
         $response->assertOk();
-        $response->assertDontSee('No proof');
+        $response->assertDontSee('Tidak ada bukti');
         $response->assertSee('storage/deposits/proofs/sample.jpg', false);
         $response->assertSee("deposit-proof-{$deposit->id}", false);
     }
@@ -146,7 +146,7 @@ class DepositListUiTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('name="search"', false);
-        $response->assertSee('Apply Filters');
+        $response->assertSee('Terapkan Filter');
         $response->assertSee('name="status"', false);
         $response->assertSee('name="method"', false);
         $response->assertSee('name="asset"', false);
@@ -161,7 +161,7 @@ class DepositListUiTest extends TestCase
         $response = $this->actingAs($admin)->get(route('admin.deposits.index'));
 
         $response->assertOk();
-        $response->assertDontSee('Approve Deposit');
-        $response->assertDontSee('Reject Deposit');
+        $response->assertDontSee('Setujui Deposit');
+        $response->assertDontSee('Tolak Deposit');
     }
 }

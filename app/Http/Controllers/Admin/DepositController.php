@@ -123,6 +123,10 @@ class DepositController extends Controller
     {
         $validated = $request->validateWithBag('rejectDeposit', [
             'rejection_reason' => ['required', 'string', 'max:500'],
+        ], [
+            'rejection_reason.required' => 'Alasan penolakan wajib diisi.',
+            'rejection_reason.string' => 'Alasan penolakan tidak valid.',
+            'rejection_reason.max' => 'Alasan penolakan maksimal 500 karakter.',
         ]);
 
         $adminId = auth()->id();

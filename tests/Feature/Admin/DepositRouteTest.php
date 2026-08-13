@@ -32,7 +32,7 @@ class DepositRouteTest extends TestCase
         $response = $this->actingAs($admin)->get(route('admin.deposits.index'));
 
         $response->assertOk();
-        $response->assertSee('No deposits found.');
+        $response->assertSee('Data deposit tidak ditemukan.');
     }
 
     public function test_deposits_index_orders_newest_first(): void
