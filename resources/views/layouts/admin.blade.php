@@ -14,9 +14,9 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
 
         <style>
-            /* Custom scrollbar for the sidebar nav */
+            /* Sidebar nav scrollbar: nearly invisible at rest, only shows faintly on hover */
             nav::-webkit-scrollbar {
-                width: 6px;
+                width: 4px;
             }
 
             nav::-webkit-scrollbar-track {
@@ -24,17 +24,21 @@
             }
 
             nav::-webkit-scrollbar-thumb {
-                background: rgba(237, 233, 254, 0.25);
+                background: transparent;
                 border-radius: 3px;
             }
 
-            nav::-webkit-scrollbar-thumb:hover {
-                background: rgba(237, 233, 254, 0.4);
+            nav:hover::-webkit-scrollbar-thumb {
+                background: rgba(237, 233, 254, 0.2);
             }
 
             nav {
                 scrollbar-width: thin;
-                scrollbar-color: rgba(237, 233, 254, 0.25) transparent;
+                scrollbar-color: transparent transparent;
+            }
+
+            nav:hover {
+                scrollbar-color: rgba(237, 233, 254, 0.2) transparent;
             }
         </style>
     </head>
@@ -58,7 +62,7 @@
             <!-- Sidebar -->
             <aside
                 :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
-                class="fixed inset-y-0 left-0 z-40 flex w-64 -translate-x-full transform flex-col bg-gradient-to-b from-violet-900 to-violet-800 transition-transform duration-200 ease-in-out lg:static lg:translate-x-0 lg:shrink-0"
+                class="fixed inset-y-0 left-0 z-40 flex w-64 -translate-x-full transform flex-col bg-gradient-to-b from-violet-900 to-violet-800 transition-transform duration-200 ease-in-out lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 lg:shrink-0"
             >
                 <div class="flex h-16 shrink-0 items-center justify-center border-b border-violet-800 px-6">
                     <span class="text-base font-semibold tracking-tight text-white">
