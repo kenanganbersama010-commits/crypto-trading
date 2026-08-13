@@ -30,12 +30,17 @@
 @endphp
 
 <a href="{{ route('admin.users.show', $user) }}" class="block rounded-lg border border-gray-200 bg-white p-5">
-    <div class="min-w-0">
-        <p class="truncate text-sm font-semibold text-gray-900">{{ $user->name }}</p>
-        <p class="truncate text-sm text-gray-500">{{ $user->email }}</p>
-        @if ($user->phone)
-            <p class="truncate text-xs text-gray-400">{{ $user->phone }}</p>
-        @endif
+    <div class="flex items-start gap-3">
+        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-violet-900 text-sm font-semibold text-white">
+            {{ Str::of($user->name)->substr(0, 1)->upper() }}
+        </div>
+        <div class="min-w-0">
+            <p class="truncate text-sm font-semibold text-gray-900">{{ $user->name }}</p>
+            <p class="truncate text-sm text-gray-500">{{ $user->email }}</p>
+            @if ($user->phone)
+                <p class="truncate text-xs text-gray-400">{{ $user->phone }}</p>
+            @endif
+        </div>
     </div>
 
     <dl class="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 border-t border-gray-100 pt-4">
