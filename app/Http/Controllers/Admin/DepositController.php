@@ -15,11 +15,38 @@ use Throwable;
 
 class DepositController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
-        $deposits = Deposit::with('user')->latest()->get();
+        $search = $request->input('search');
+        $status = $request->input('status');
+        $method = $request->input('method');
+        $asset = $request->input('asset');
 
-        return view('admin.deposits.index', compact('deposits'));
+        $deposits = Deposit::query()
+            ->when($search, function ($query, $search) {
+                $query->where(function ($query) use ($search) {
+                    if (is_numeric($search)) {
+                        $query->orWhere('id', $search);
+                    }
+
+                    $query->orWhereHas('user', function ($query) use ($search) {
+                        $query->where('name', 'like', "%{$search}%")
+                            ->orWhere('email', 'like', "%{$search}%");
+                    });
+                });
+            })
+            ->when($status, fn ($query, $status) => $query->where('status', $status))
+            ->when($method, fn ($query, $method) => $query->where('method', $method))
+            ->when($asset, fn ($query, $asset) => $query->where('asset', $asset))
+            ->with('user')
+            ->latest()
+            ->paginate(15)
+            ->withQueryString();
+
+        $methods = Deposit::query()->select('method')->distinct()->orderBy('method')->pluck('method');
+        $assets = Deposit::query()->select('asset')->distinct()->orderBy('asset')->pluck('asset');
+
+        return view('admin.deposits.index', compact('deposits', 'methods', 'assets'));
     }
 
     public function show(Deposit $deposit): View

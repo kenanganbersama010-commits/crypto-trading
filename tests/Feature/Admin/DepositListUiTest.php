@@ -136,7 +136,7 @@ class DepositListUiTest extends TestCase
         $response->assertSee('&lt;script&gt;alert(1)&lt;/script&gt;', false);
     }
 
-    public function test_no_search_filter_or_pagination_controls_are_present(): void
+    public function test_search_and_filter_controls_are_present(): void
     {
         $admin = User::factory()->create(['role' => 'admin']);
         $user = User::factory()->create(['role' => 'user']);
@@ -145,9 +145,11 @@ class DepositListUiTest extends TestCase
         $response = $this->actingAs($admin)->get(route('admin.deposits.index'));
 
         $response->assertOk();
-        $response->assertDontSee('name="search"', false);
-        $response->assertDontSee('Apply Filters');
-        $response->assertDontSee('pagination', false);
+        $response->assertSee('name="search"', false);
+        $response->assertSee('Apply Filters');
+        $response->assertSee('name="status"', false);
+        $response->assertSee('name="method"', false);
+        $response->assertSee('name="asset"', false);
     }
 
     public function test_no_approve_or_reject_actions_are_present(): void
@@ -159,7 +161,7 @@ class DepositListUiTest extends TestCase
         $response = $this->actingAs($admin)->get(route('admin.deposits.index'));
 
         $response->assertOk();
-        $response->assertDontSee('Approve');
-        $response->assertDontSee('Reject');
+        $response->assertDontSee('Approve Deposit');
+        $response->assertDontSee('Reject Deposit');
     }
 }

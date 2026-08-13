@@ -19,11 +19,94 @@
 
         <div
             x-data="{ loading: false }"
+            @submit="loading = true"
             @click="if ($event.target.closest('a')) loading = true"
         >
-            <div class="rounded-lg border border-gray-200 bg-white">
+            <form method="GET" action="{{ route('admin.deposits.index') }}" class="space-y-4">
+                <!-- Search Card -->
+                <div class="rounded-lg border border-gray-200 bg-white p-4">
+                    <label for="search" class="sr-only">Search deposits</label>
+                    <input
+                        type="text"
+                        id="search"
+                        name="search"
+                        value="{{ request('search') }}"
+                        placeholder="Search by deposit ID, user name, or email..."
+                        class="block w-full rounded-md border-gray-300 text-sm text-gray-900 focus:border-violet-500 focus:ring-violet-500"
+                    >
+                </div>
+
+                <!-- Filter Card -->
+                <div class="rounded-lg border border-gray-200 bg-white p-4">
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:items-end">
+                        <div>
+                            <label for="status" class="block text-xs font-medium text-gray-500">Status</label>
+                            <select
+                                id="status"
+                                name="status"
+                                class="mt-1 block w-full rounded-md border-gray-300 text-sm text-gray-900 focus:border-violet-500 focus:ring-violet-500"
+                            >
+                                <option value="">All</option>
+                                <option value="pending" @selected(request('status') === 'pending')>Pending</option>
+                                <option value="approved" @selected(request('status') === 'approved')>Approved</option>
+                                <option value="rejected" @selected(request('status') === 'rejected')>Rejected</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="method" class="block text-xs font-medium text-gray-500">Method</label>
+                            <select
+                                id="method"
+                                name="method"
+                                class="mt-1 block w-full rounded-md border-gray-300 text-sm text-gray-900 focus:border-violet-500 focus:ring-violet-500"
+                            >
+                                <option value="">All</option>
+                                @foreach ($methods as $methodOption)
+                                    <option value="{{ $methodOption }}" @selected(request('method') === $methodOption)>
+                                        {{ ucwords(str_replace('_', ' ', $methodOption)) }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="asset" class="block text-xs font-medium text-gray-500">Asset</label>
+                            <select
+                                id="asset"
+                                name="asset"
+                                class="mt-1 block w-full rounded-md border-gray-300 text-sm text-gray-900 focus:border-violet-500 focus:ring-violet-500"
+                            >
+                                <option value="">All</option>
+                                @foreach ($assets as $assetOption)
+                                    <option value="{{ $assetOption }}" @selected(request('asset') === $assetOption)>{{ $assetOption }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="flex gap-2">
+                            <button type="submit" class="rounded-md bg-violet-600 px-4 py-2 text-sm font-medium text-white">
+                                Apply Filters
+                            </button>
+
+                            @if (request()->hasAny(['search', 'status', 'method', 'asset']))
+                                <a href="{{ route('admin.deposits.index') }}" class="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700">
+                                    Reset
+                                </a>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <div class="mt-6 rounded-lg border border-gray-200 bg-white">
                 @if ($deposits->isEmpty())
-                    <p class="px-5 py-8 text-center text-sm text-gray-500">No deposits found.</p>
+                    <p class="px-5 py-8 text-center text-sm text-gray-500">
+                        @if (request()->hasAny(['search', 'status', 'method', 'asset']))
+                            No deposits match your current filters.
+                        @else
+                            No deposits found.
+                        @endif
+                    </p>
                 @else
                     <!-- Table (md and up) -->
                     <div class="hidden md:block overflow-x-auto">
@@ -132,6 +215,12 @@
                     </div>
                 @endif
             </div>
+
+            @if ($deposits->isNotEmpty())
+                <div class="mt-6">
+                    {{ $deposits->links() }}
+                </div>
+            @endif
 
             @foreach ($deposits as $deposit)
                 @if ($deposit->proof_image)

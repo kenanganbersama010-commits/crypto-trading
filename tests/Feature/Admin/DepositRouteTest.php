@@ -68,8 +68,9 @@ class DepositRouteTest extends TestCase
 
         $this->actingAs($admin)->get(route('admin.deposits.index'))->assertOk();
 
-        // Fixed cost regardless of row count: deposits query + batched user eager load.
-        $this->assertLessThanOrEqual(3, $queryCount);
+        // Fixed cost regardless of row count: count + paginated select + batched user
+        // eager load + the two distinct method/asset lookups for filter dropdowns.
+        $this->assertLessThanOrEqual(5, $queryCount);
     }
 
     public function test_admin_can_view_deposit_detail(): void
