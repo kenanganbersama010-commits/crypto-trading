@@ -33,9 +33,9 @@ class AdjustmentHistoryViewTest extends TestCase
         $response = $this->actingAs($admin)->get(route('admin.adjustment-history.index'));
 
         $response->assertOk();
-        $response->assertSee('Adjustment History');
+        $response->assertSee('Riwayat Penyesuaian Saldo');
         $response->assertSee($user->name);
-        $response->assertSee('Add');
+        $response->assertSee('Tambah');
         $response->assertSee('Bonus');
     }
 
@@ -46,7 +46,7 @@ class AdjustmentHistoryViewTest extends TestCase
         $response = $this->actingAs($admin)->get(route('admin.adjustment-history.index'));
 
         $response->assertOk();
-        $response->assertSee('No adjustment history found.');
+        $response->assertSee('Riwayat penyesuaian tidak ditemukan.');
     }
 
     public function test_guest_is_denied_access_to_adjustment_history(): void

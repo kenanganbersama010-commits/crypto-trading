@@ -210,7 +210,7 @@ class AdjustmentHistoryFilterTest extends TestCase
         $response = $this->actingAs($admin)->get(route('admin.adjustment-history.index', ['search' => 'NonExistentUserXYZ']));
 
         $response->assertOk();
-        $response->assertSee('No adjustment history found for the selected filters.');
+        $response->assertSee('Riwayat penyesuaian tidak ditemukan untuk filter yang dipilih.');
     }
 
     public function test_inverted_date_range_is_ignored_not_a_query_error(): void
@@ -227,7 +227,7 @@ class AdjustmentHistoryFilterTest extends TestCase
         ]));
 
         $response->assertOk();
-        $response->assertSee('Invalid date filter.');
+        $response->assertSee('Filter tanggal tidak valid.');
         $this->assertCount(1, $response->viewData('adjustments'));
     }
 
@@ -242,7 +242,7 @@ class AdjustmentHistoryFilterTest extends TestCase
         $response = $this->actingAs($admin)->get(route('admin.adjustment-history.index', ['from_date' => 'not-a-date']));
 
         $response->assertOk();
-        $response->assertSee('Invalid date filter.');
+        $response->assertSee('Filter tanggal tidak valid.');
         // The malformed date must not silently narrow results without feedback.
         $this->assertCount(1, $response->viewData('adjustments'));
     }
