@@ -43,7 +43,17 @@
         </style>
     </head>
     <body class="font-sans antialiased">
-        <div x-data="{ sidebarOpen: false }" class="min-h-screen bg-gray-50 lg:flex">
+        <div
+            x-data="{
+                sidebarOpen: false,
+                sidebarCollapsed: localStorage.getItem('adminSidebarCollapsed') === 'true',
+                toggleSidebarCollapse() {
+                    this.sidebarCollapsed = !this.sidebarCollapsed;
+                    localStorage.setItem('adminSidebarCollapsed', this.sidebarCollapsed);
+                },
+            }"
+            class="min-h-screen bg-gray-50 lg:flex"
+        >
 
             <!-- Mobile overlay -->
             <div
@@ -61,13 +71,19 @@
 
             <!-- Sidebar -->
             <aside
-                :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
-                class="fixed inset-y-0 left-0 z-40 flex w-64 -translate-x-full transform flex-col bg-gradient-to-b from-violet-900 to-violet-800 transition-transform duration-200 ease-in-out lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 lg:shrink-0"
+                :class="[sidebarOpen ? 'translate-x-0' : '-translate-x-full', sidebarCollapsed ? 'lg:w-20' : 'lg:w-64']"
+                class="fixed inset-y-0 left-0 z-40 flex w-64 -translate-x-full transform flex-col bg-gradient-to-b from-violet-900 to-violet-800 transition-all duration-200 ease-in-out lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 lg:shrink-0"
             >
-                <div class="flex h-16 shrink-0 items-center justify-center border-b border-violet-800 px-6">
-                    <span class="text-base font-semibold tracking-tight text-white">
+                <div class="flex h-16 shrink-0 items-center justify-center overflow-hidden border-b border-violet-800 px-6">
+                    <span class="whitespace-nowrap text-base font-semibold tracking-tight text-white" :class="sidebarCollapsed ? 'lg:hidden' : ''">
                         {{ config('app.name', 'Crypto Trading') }}
                     </span>
+                    <div
+                        class="hidden h-8 w-8 items-center justify-center rounded-full bg-violet-700 text-sm font-semibold text-white"
+                        :class="sidebarCollapsed ? 'lg:flex' : ''"
+                    >
+                        {{ Str::of(config('app.name', 'Crypto Trading'))->substr(0, 1)->upper() }}
+                    </div>
                 </div>
 
                 <nav class="flex-1 space-y-6 overflow-y-auto px-3 py-4">
@@ -132,7 +148,7 @@
                         class="flex w-full items-center justify-center gap-2 rounded-lg bg-violet-700 px-4 py-2.5 text-sm font-medium text-white transition-colors duration-100 hover:bg-violet-600"
                     >
                         <x-icon name="logout" class="h-5 w-5 shrink-0" />
-                        Keluar
+                        <span class="whitespace-nowrap" :class="sidebarCollapsed ? 'lg:hidden' : ''">Keluar</span>
                     </button>
                 </div>
             </aside>
@@ -150,6 +166,17 @@
                             >
                                 <span class="sr-only">Buka sidebar</span>
                                 <x-icon name="menu" class="h-6 w-6" />
+                            </button>
+
+                            <button
+                                @click="toggleSidebarCollapse()"
+                                type="button"
+                                class="hidden -ml-1.5 rounded-md p-1.5 text-gray-500 hover:bg-gray-100 hover:text-gray-700 lg:inline-flex"
+                            >
+                                <span class="sr-only" x-text="sidebarCollapsed ? 'Perbesar sidebar' : 'Perkecil sidebar'"></span>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12H12m-8.25 5.25h16.5" />
+                                </svg>
                             </button>
 
                             <h1 class="text-sm font-semibold text-gray-900">
