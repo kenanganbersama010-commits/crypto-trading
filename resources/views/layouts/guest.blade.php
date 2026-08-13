@@ -16,7 +16,14 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="font-sans text-gray-900 antialiased">
-        <div class="min-h-screen flex flex-col items-center justify-center bg-violet-600 px-4 py-10">
+        <div class="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-violet-950 via-violet-900 to-violet-800 px-4 py-10">
+            <div class="mb-6 flex flex-col items-center gap-2">
+                <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-lg font-bold text-violet-900 shadow-sm">
+                    {{ Str::of(config('app.name', 'Crypto Trading'))->substr(0, 1)->upper() }}
+                </div>
+                <span class="text-sm font-medium tracking-wide text-violet-100">{{ config('app.name', 'Crypto Trading') }}</span>
+            </div>
+
             <div class="w-full bg-white rounded-2xl shadow-sm px-6 py-8 sm:px-10 sm:py-10" style="max-width: {{ $maxWidth }}">
                 @if ($heading)
                     <div class="text-center mb-8">
