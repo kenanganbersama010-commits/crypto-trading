@@ -27,7 +27,7 @@ class AdjustBalanceViewTest extends TestCase
         $response = $this->actingAs($admin)->get(route('admin.users.show', $user));
 
         $response->assertOk();
-        $response->assertSee('Balance successfully added to the wallet.');
+        $response->assertSee('Saldo berhasil ditambahkan ke dompet.');
         $response->assertSee('600');
     }
 
@@ -47,7 +47,7 @@ class AdjustBalanceViewTest extends TestCase
         $response = $this->actingAs($admin)->get(route('admin.users.show', $user));
 
         $response->assertOk();
-        $response->assertSee('Balance successfully deducted from the wallet.');
+        $response->assertSee('Saldo berhasil dikurangi dari dompet.');
         $response->assertSee('400');
     }
 
