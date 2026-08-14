@@ -111,8 +111,12 @@ export class MarketWebSocket {
 
     scheduleReconnect() {
         if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+            this.shouldReconnect = false; // Stop trying after max attempts
             this.updateStatus("error");
-            console.error("[Market WebSocket] Max reconnect attempts reached");
+            console.error(
+                "[Market WebSocket] Max reconnect attempts reached - giving up",
+            );
+            console.log("[Market WebSocket] Using fallback data mode");
             return;
         }
 
@@ -120,10 +124,12 @@ export class MarketWebSocket {
         this.updateStatus("reconnecting");
 
         console.log(
-            `[Market WebSocket] Reconnecting in ${this.reconnectDelay}ms (attempt ${this.reconnectAttempts})`,
+            `[Market WebSocket] Reconnecting in ${this.reconnectDelay}ms (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`,
         );
 
-        setTimeout(() => {
+        // Store timeout so we can clear it if needed
+        this.reconnectTimeout = setTimeout(() => {
+            this.reconnectTimeout = null;
             this.connect();
         }, this.reconnectDelay);
 
@@ -140,6 +146,12 @@ export class MarketWebSocket {
 
     disconnect() {
         this.shouldReconnect = false;
+
+        // Clear any pending reconnect timeout
+        if (this.reconnectTimeout) {
+            clearTimeout(this.reconnectTimeout);
+            this.reconnectTimeout = null;
+        }
 
         if (this.ws) {
             this.ws.close();

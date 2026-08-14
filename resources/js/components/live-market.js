@@ -113,7 +113,17 @@ export function liveMarket() {
 
                 onStatusChange: (status) => {
                     this.status = status;
-                    console.log(`[Live Market] Status: ${status}`);
+
+                    // If WebSocket gave up after max attempts, show appropriate message
+                    if (
+                        status === "error" &&
+                        this.ws &&
+                        !this.ws.shouldReconnect
+                    ) {
+                        console.log(
+                            "[Live Market] WebSocket unavailable - using static data",
+                        );
+                    }
                 },
 
                 onError: (error) => {

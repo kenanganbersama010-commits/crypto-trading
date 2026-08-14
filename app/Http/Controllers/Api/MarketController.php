@@ -27,7 +27,7 @@ class MarketController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'symbol' => 'required|string|regex:/^[A-Z0-9]+$/|max:20',
-            'fallback' => 'nullable|boolean',
+            'fallback' => 'nullable|in:true,false,1,0',
         ]);
 
         if ($validator->fails()) {
@@ -39,7 +39,7 @@ class MarketController extends Controller
         }
 
         $symbol = strtoupper($request->input('symbol'));
-        $allowFallback = $request->input('fallback', true);
+        $allowFallback = filter_var($request->input('fallback', true), FILTER_VALIDATE_BOOLEAN);
         
         $ticker = $this->marketService->getTickerWithFallback($symbol, $allowFallback);
 
@@ -72,7 +72,7 @@ class MarketController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'symbols' => 'nullable|string',
-            'fallback' => 'nullable|boolean',
+            'fallback' => 'nullable|in:true,false,1,0',
         ]);
 
         if ($validator->fails()) {
@@ -85,7 +85,7 @@ class MarketController extends Controller
 
         // Use provided symbols or default ones
         $symbolsInput = $request->input('symbols');
-        $allowFallback = $request->input('fallback', true);
+        $allowFallback = filter_var($request->input('fallback', true), FILTER_VALIDATE_BOOLEAN);
         
         if ($symbolsInput) {
             $symbols = array_map('trim', explode(',', $symbolsInput));
@@ -153,7 +153,7 @@ class MarketController extends Controller
             'symbol' => 'required|string|regex:/^[A-Z0-9]+$/|max:20',
             'interval' => 'nullable|string|in:1m,3m,5m,15m,30m,1h,2h,4h,6h,8h,12h,1d,3d,1w,1M',
             'limit' => 'nullable|integer|min:1|max:1000',
-            'fallback' => 'nullable|boolean',
+            'fallback' => 'nullable|in:true,false,1,0',
         ]);
 
         if ($validator->fails()) {
@@ -166,8 +166,8 @@ class MarketController extends Controller
 
         $symbol = strtoupper($request->input('symbol'));
         $interval = $request->input('interval', '1m');
-        $limit = $request->input('limit', 100);
-        $allowFallback = $request->input('fallback', true);
+        $limit = (int) $request->input('limit', 100);
+        $allowFallback = filter_var($request->input('fallback', true), FILTER_VALIDATE_BOOLEAN);
 
         $klines = $this->marketService->getKlinesWithFallback($symbol, $interval, $limit, $allowFallback);
 
