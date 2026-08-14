@@ -3,7 +3,7 @@
  * Handles candlestick chart rendering and updates using Lightweight Charts v5
  */
 
-import { createChart, ColorType } from "lightweight-charts";
+import { createChart } from "lightweight-charts";
 
 export class MarketChart {
     constructor(containerId, options = {}) {
@@ -22,10 +22,25 @@ export class MarketChart {
     }
 
     initChart() {
+        // Check container dimensions
+        const containerWidth = this.container.clientWidth;
+        const containerHeight = this.container.clientHeight || 400;
+
+        console.log(
+            `[Market Chart] Container size: ${containerWidth}x${containerHeight}`,
+        );
+
+        if (containerWidth === 0 || containerHeight === 0) {
+            console.error("[Market Chart] Invalid container dimensions");
+            return;
+        }
+
         // Chart options with dark theme (v5 API)
         const chartOptions = {
+            width: containerWidth,
+            height: containerHeight,
             layout: {
-                background: { type: ColorType.Solid, color: "transparent" },
+                background: { color: "transparent" },
                 textColor: "#94a3b8",
             },
             grid: {
@@ -34,16 +49,6 @@ export class MarketChart {
             },
             crosshair: {
                 mode: 1,
-                vertLine: {
-                    width: 1,
-                    color: "rgba(139, 92, 246, 0.5)",
-                    style: 0,
-                },
-                horzLine: {
-                    width: 1,
-                    color: "rgba(139, 92, 246, 0.5)",
-                    style: 0,
-                },
             },
             rightPriceScale: {
                 borderColor: "rgba(148, 163, 184, 0.2)",
@@ -53,17 +58,11 @@ export class MarketChart {
                 timeVisible: true,
                 secondsVisible: false,
             },
-            handleScroll: {
-                vertTouchDrag: true,
-            },
-            handleScale: {
-                axisPressedMouseMove: true,
-            },
         };
 
         this.chart = createChart(this.container, chartOptions);
 
-        // Candlestick series options (v5 API uses addSeries instead of addCandlestickSeries)
+        // Candlestick series options (v5 API)
         const candlestickOptions = {
             upColor: "#10b981",
             downColor: "#ef4444",
@@ -73,11 +72,9 @@ export class MarketChart {
             wickDownColor: "#ef4444",
         };
 
-        // V5 API: Use addSeries with type 'Candlestick'
-        this.candlestickSeries = this.chart.addSeries(
-            "Candlestick",
-            candlestickOptions,
-        );
+        // V5 API: addCandlestickSeries (method name changed in v5)
+        this.candlestickSeries =
+            this.chart.addCandlestickSeries(candlestickOptions);
 
         // Handle resize
         this.handleResize();
@@ -90,10 +87,15 @@ export class MarketChart {
 
     handleResize() {
         if (this.chart && this.container) {
-            this.chart.applyOptions({
-                width: this.container.clientWidth,
-                height: this.container.clientHeight || 400,
-            });
+            const width = this.container.clientWidth;
+            const height = this.container.clientHeight || 400;
+
+            if (width > 0 && height > 0) {
+                this.chart.applyOptions({
+                    width: width,
+                    height: height,
+                });
+            }
         }
     }
 
@@ -102,17 +104,44 @@ export class MarketChart {
             return;
         }
 
-        this.candlestickSeries.setData(candles);
+        // Validate and sort candles
+        const validCandles = candles
+            .filter((candle) => {
+                return (
+                    candle.time &&
+                    !isNaN(candle.open) &&
+                    !isNaN(candle.high) &&
+                    !isNaN(candle.low) &&
+                    !isNaN(candle.close)
+                );
+            })
+            .sort((a, b) => a.time - b.time);
+
+        if (validCandles.length === 0) {
+            console.error("[Market Chart] No valid candles to display");
+            return;
+        }
+
+        console.log(`[Market Chart] Setting ${validCandles.length} candles`);
+        console.log(`[Market Chart] First candle:`, validCandles[0]);
+        console.log(
+            `[Market Chart] Last candle:`,
+            validCandles[validCandles.length - 1],
+        );
+
+        this.candlestickSeries.setData(validCandles);
 
         // Store the last candle as current
-        if (candles.length > 0) {
-            this.currentCandle = { ...candles[candles.length - 1] };
+        if (validCandles.length > 0) {
+            this.currentCandle = { ...validCandles[validCandles.length - 1] };
         }
 
         // Fit content
         this.chart.timeScale().fitContent();
 
-        console.log(`[Market Chart] Set ${candles.length} candles`);
+        console.log(
+            `[Market Chart] Successfully set ${validCandles.length} candles`,
+        );
     }
 
     updateCandle(newCandleData) {
