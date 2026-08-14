@@ -104,13 +104,14 @@
 
         <main>
             {{-- ========================= HERO ========================= --}}
-            <section class="relative overflow-hidden bg-gradient-to-b from-violet-950/40 via-slate-950 to-slate-950">
+            <section class="relative overflow-hidden bg-gradient-to-b from-violet-950/40 via-slate-950 to-slate-950" x-data="heroMarket()" x-init="init()">
                 <div class="mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 px-4 py-16 sm:px-6 sm:py-24 lg:grid-cols-2 lg:px-8 lg:py-32">
                     {{-- Copy --}}
                     <div>
                         <span class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-violet-300">
-                            <span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
-                            Demo market data
+                            <span class="h-1.5 w-1.5 rounded-full" :class="statusDot"></span>
+                            <span x-text="statusText" :class="statusColor"></span>
+                            Market
                         </span>
 
                         <h1 class="mt-5 text-4xl font-extrabold leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl">
@@ -147,11 +148,41 @@
                         </div>
                     </div>
 
-                    {{-- Visual: market snapshot card --}}
+                    {{-- Visual: Live market snapshot card --}}
                     <div class="relative">
                         <div class="absolute -inset-8 -z-10 rounded-full bg-gradient-to-br from-violet-600/20 to-blue-600/10 blur-3xl"></div>
 
-                        <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-5 shadow-lg backdrop-blur-sm">
+                        {{-- Loading State --}}
+                        <div x-show="isLoading" class="rounded-2xl border border-white/10 bg-white/[0.03] p-5 shadow-lg backdrop-blur-sm">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <span class="h-8 w-8 animate-pulse rounded-full bg-white/5"></span>
+                                    <div class="space-y-2">
+                                        <div class="h-4 w-24 animate-pulse rounded bg-white/5"></div>
+                                        <div class="h-3 w-16 animate-pulse rounded bg-white/5"></div>
+                                    </div>
+                                </div>
+                                <div class="h-6 w-16 animate-pulse rounded-lg bg-white/5"></div>
+                            </div>
+                            <div class="mt-4 h-10 w-40 animate-pulse rounded bg-white/5"></div>
+                            <div class="mt-4 h-20 w-full animate-pulse rounded bg-white/5"></div>
+                            <div class="mt-4 grid grid-cols-2 gap-3 border-t border-white/10 pt-4">
+                                <div class="h-16 animate-pulse rounded-xl bg-white/5"></div>
+                                <div class="h-16 animate-pulse rounded-xl bg-white/5"></div>
+                            </div>
+                        </div>
+
+                        {{-- Error State --}}
+                        <div x-show="!isLoading && error" x-cloak class="rounded-2xl border border-red-500/20 bg-red-500/5 p-8 text-center">
+                            <svg class="mx-auto h-12 w-12 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                            <p class="mt-3 text-sm font-semibold text-white">Market data unavailable</p>
+                            <p class="mt-1 text-xs text-slate-400">Reconnecting...</p>
+                        </div>
+
+                        {{-- Live Market Card --}}
+                        <div x-show="!isLoading && !error && market" x-cloak class="rounded-2xl border border-white/10 bg-white/[0.03] p-5 shadow-lg backdrop-blur-sm">
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center gap-2">
                                     <span class="flex h-8 w-8 items-center justify-center rounded-full bg-amber-500/15 text-xs font-bold text-amber-400">₿</span>
@@ -160,31 +191,43 @@
                                         <p class="text-xs text-slate-500">Bitcoin</p>
                                     </div>
                                 </div>
-                                <span class="rounded-lg bg-emerald-500/10 px-2 py-1 text-xs font-semibold text-emerald-400">+1.24%</span>
+                                <span class="rounded-lg px-2 py-1 text-xs font-semibold" :class="getChangeColor(market.change24h)" x-text="formatChange(market.change24h)"></span>
                             </div>
 
-                            <p class="mt-4 text-3xl font-bold tracking-tight text-white">$62,802.29</p>
+                            <p class="mt-4 text-3xl font-bold tracking-tight text-white">
+                                $<span x-text="formatPrice(market.price)"></span>
+                            </p>
 
-                            {{-- mini area chart --}}
+                            {{-- Mini area chart --}}
                             <svg viewBox="0 0 300 80" class="mt-4 h-20 w-full" preserveAspectRatio="none">
                                 <defs>
                                     <linearGradient id="heroChartFill" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="0%" stop-color="#34d399" stop-opacity="0.35" />
-                                        <stop offset="100%" stop-color="#34d399" stop-opacity="0" />
+                                        <stop offset="0%" :stop-color="isPositive(market.change24h) ? '#34d399' : '#f87171'" stop-opacity="0.35" />
+                                        <stop offset="100%" :stop-color="isPositive(market.change24h) ? '#34d399' : '#f87171'" stop-opacity="0" />
                                     </linearGradient>
                                 </defs>
-                                <path d="M0,55 L25,50 L50,58 L75,40 L100,45 L125,30 L150,35 L175,20 L200,28 L225,15 L250,22 L275,10 L300,18 L300,80 L0,80 Z" fill="url(#heroChartFill)" />
-                                <polyline points="0,55 25,50 50,58 75,40 100,45 125,30 150,35 175,20 200,28 225,15 250,22 275,10 300,18" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                <path 
+                                    :d="isPositive(market.change24h) ? 'M0,55 L25,50 L50,58 L75,40 L100,45 L125,30 L150,35 L175,20 L200,28 L225,15 L250,22 L275,10 L300,18 L300,80 L0,80 Z' : 'M0,25 L25,30 L50,22 L75,40 L100,35 L125,50 L150,45 L175,60 L200,52 L225,65 L250,58 L275,70 L300,62 L300,80 L0,80 Z'" 
+                                    fill="url(#heroChartFill)" 
+                                />
+                                <polyline 
+                                    :points="isPositive(market.change24h) ? '0,55 25,50 50,58 75,40 100,45 125,30 150,35 175,20 200,28 225,15 250,22 275,10 300,18' : '0,25 25,30 50,22 75,40 100,35 125,50 150,45 175,60 200,52 225,65 250,58 275,70 300,62'" 
+                                    fill="none" 
+                                    :stroke="isPositive(market.change24h) ? '#34d399' : '#f87171'" 
+                                    stroke-width="2" 
+                                    stroke-linecap="round" 
+                                    stroke-linejoin="round" 
+                                />
                             </svg>
 
                             <div class="mt-4 grid grid-cols-2 gap-3 border-t border-white/10 pt-4">
                                 <div class="rounded-xl bg-white/5 px-3 py-2">
-                                    <p class="text-[11px] text-slate-500">Portfolio value</p>
-                                    <p class="mt-0.5 text-sm font-semibold text-white">$18,450.12</p>
+                                    <p class="text-[11px] text-slate-500">24h High</p>
+                                    <p class="mt-0.5 text-sm font-semibold text-white">$<span x-text="formatPrice(market.high24h)"></span></p>
                                 </div>
                                 <div class="rounded-xl bg-white/5 px-3 py-2">
-                                    <p class="text-[11px] text-slate-500">24h change</p>
-                                    <p class="mt-0.5 text-sm font-semibold text-emerald-400">+3.8%</p>
+                                    <p class="text-[11px] text-slate-500">24h Low</p>
+                                    <p class="mt-0.5 text-sm font-semibold text-white">$<span x-text="formatPrice(market.low24h)"></span></p>
                                 </div>
                             </div>
                         </div>
