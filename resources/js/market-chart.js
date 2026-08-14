@@ -3,7 +3,7 @@
  * Handles candlestick chart rendering and updates using Lightweight Charts v5
  */
 
-import { createChart } from "lightweight-charts";
+import { createChart, CandlestickSeries } from "lightweight-charts";
 
 export class MarketChart {
     constructor(containerId, options = {}) {
@@ -72,9 +72,11 @@ export class MarketChart {
             wickDownColor: "#ef4444",
         };
 
-        // V5 API: addCandlestickSeries (method name changed in v5)
-        this.candlestickSeries =
-            this.chart.addCandlestickSeries(candlestickOptions);
+        // V5 API: Use addSeries with CandlestickSeries definition
+        this.candlestickSeries = this.chart.addSeries(
+            CandlestickSeries,
+            candlestickOptions,
+        );
 
         // Handle resize
         this.handleResize();
