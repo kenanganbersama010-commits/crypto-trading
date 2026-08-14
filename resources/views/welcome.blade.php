@@ -193,57 +193,79 @@
             </section>
 
             {{-- ========================= MARKET OVERVIEW ========================= --}}
-            <section id="markets" class="scroll-mt-16 border-t border-white/10 bg-slate-950 py-16 sm:py-20">
+            <section id="markets" class="scroll-mt-16 border-t border-white/10 bg-slate-950 py-16 sm:py-20" x-data="liveMarkets()" x-init="init()">
                 <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                         <div>
                             <h2 class="text-2xl font-bold text-white sm:text-3xl">Live Crypto Market</h2>
                             <p class="mt-1.5 text-sm text-slate-400">A snapshot of the assets available to trade.</p>
                         </div>
-                        <span class="inline-flex w-fit items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-400">
-                            Demo data — not live pricing
-                        </span>
+                        
+                        {{-- Live Status Indicator --}}
+                        <div class="inline-flex w-fit items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1">
+                            <span class="h-2 w-2 rounded-full" :class="statusDot"></span>
+                            <span class="text-xs" :class="statusColor" x-text="statusText"></span>
+                        </div>
                     </div>
 
-                    @php
-                        $markets = [
-                            ['symbol' => 'BTC', 'name' => 'Bitcoin', 'price' => '$62,802.29', 'change' => '+1.24%', 'up' => true],
-                            ['symbol' => 'ETH', 'name' => 'Ethereum', 'price' => '$1,876.37', 'change' => '+0.82%', 'up' => true],
-                            ['symbol' => 'USDT', 'name' => 'Tether', 'price' => '$0.9987', 'change' => '+0.01%', 'up' => true],
-                            ['symbol' => 'BNB', 'name' => 'BNB', 'price' => '$605.01', 'change' => '+2.35%', 'up' => true],
-                            ['symbol' => 'SOL', 'name' => 'Solana', 'price' => '$142.18', 'change' => '-1.06%', 'up' => false],
-                            ['symbol' => 'XRP', 'name' => 'XRP', 'price' => '$0.5231', 'change' => '-0.44%', 'up' => false],
-                        ];
-                    @endphp
-
-                    <div class="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                        @foreach ($markets as $m)
+                    {{-- Loading State --}}
+                    <div x-show="isLoading" class="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                        <template x-for="i in 6" :key="i">
                             <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center gap-3">
-                                        <span class="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-violet-500/20 to-blue-500/20 text-xs font-bold text-white">
-                                            {{ $m['symbol'] }}
-                                        </span>
-                                        <div>
-                                            <p class="text-sm font-semibold text-white">{{ $m['name'] }}</p>
-                                            <p class="text-xs text-slate-500">{{ $m['symbol'] }}</p>
+                                        <div class="h-9 w-9 animate-pulse rounded-full bg-white/5"></div>
+                                        <div class="space-y-2">
+                                            <div class="h-4 w-20 animate-pulse rounded bg-white/5"></div>
+                                            <div class="h-3 w-12 animate-pulse rounded bg-white/5"></div>
                                         </div>
                                     </div>
-                                    <span class="rounded-lg px-2 py-1 text-xs font-semibold {{ $m['up'] ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400' }}">
-                                        {{ $m['change'] }}
-                                    </span>
+                                    <div class="h-6 w-16 animate-pulse rounded-lg bg-white/5"></div>
                                 </div>
-                                <p class="mt-4 text-xl font-bold text-white">{{ $m['price'] }}</p>
+                                <div class="mt-4 h-6 w-32 animate-pulse rounded bg-white/5"></div>
+                                <div class="mt-2 h-8 w-full animate-pulse rounded bg-white/5"></div>
+                            </div>
+                        </template>
+                    </div>
 
+                    {{-- Error State --}}
+                    <div x-show="!isLoading && error" x-cloak class="mt-8 rounded-2xl border border-red-500/20 bg-red-500/5 p-8 text-center">
+                        <svg class="mx-auto h-12 w-12 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        <p class="mt-3 text-sm font-semibold text-white">Failed to load market data</p>
+                        <p class="mt-1 text-xs text-slate-400" x-text="error"></p>
+                    </div>
+
+                    {{-- Market Cards --}}
+                    <div x-show="!isLoading && !error" x-cloak class="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                        <template x-for="market in markets" :key="market.symbol">
+                            <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-4 transition-colors hover:bg-white/[0.05]">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <span class="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-violet-500/20 to-blue-500/20 text-xs font-bold text-white" x-text="market.shortSymbol"></span>
+                                        <div>
+                                            <p class="text-sm font-semibold text-white" x-text="market.name"></p>
+                                            <p class="text-xs text-slate-500" x-text="market.shortSymbol"></p>
+                                        </div>
+                                    </div>
+                                    <span class="rounded-lg px-2 py-1 text-xs font-semibold" :class="getChangeColor(market.change24h)" x-text="formatChange(market.change24h)"></span>
+                                </div>
+                                <p class="mt-4 text-xl font-bold text-white">
+                                    $<span x-text="formatPrice(market.price)"></span>
+                                </p>
+
+                                {{-- Mini Chart Sparkline --}}
                                 <svg viewBox="0 0 120 32" class="mt-2 h-8 w-full" preserveAspectRatio="none">
-                                    @if ($m['up'])
+                                    <template x-if="isPositive(market.change24h)">
                                         <polyline points="0,24 15,22 30,25 45,16 60,18 75,10 90,14 105,6 120,9" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                                    @else
+                                    </template>
+                                    <template x-if="!isPositive(market.change24h)">
                                         <polyline points="0,8 15,10 30,7 45,15 60,13 75,20 90,17 105,24 120,22" fill="none" stroke="#f87171" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                                    @endif
+                                    </template>
                                 </svg>
                             </div>
-                        @endforeach
+                        </template>
                     </div>
                 </div>
             </section>
