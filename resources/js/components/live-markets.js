@@ -150,39 +150,53 @@ export function liveMarkets() {
         },
 
         formatPrice(price) {
-            if (!price) return "0.00";
+            const numericValue = Number(price);
+            if (!Number.isFinite(numericValue) || numericValue <= 0) {
+                return "0.00";
+            }
 
             // Use different precision based on price magnitude
-            if (price >= 1000) {
+            if (numericValue >= 1000) {
                 return new Intl.NumberFormat("en-US", {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,
-                }).format(price);
-            } else if (price >= 1) {
+                }).format(numericValue);
+            } else if (numericValue >= 1) {
                 return new Intl.NumberFormat("en-US", {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 4,
-                }).format(price);
+                }).format(numericValue);
             } else {
                 return new Intl.NumberFormat("en-US", {
                     minimumFractionDigits: 4,
                     maximumFractionDigits: 6,
-                }).format(price);
+                }).format(numericValue);
             }
         },
 
         formatChange(change) {
-            if (!change) return "0.00";
-            const sign = change >= 0 ? "+" : "";
-            return `${sign}${change.toFixed(2)}%`;
+            const numericValue = Number(change);
+            if (!Number.isFinite(numericValue)) {
+                return "0.00%";
+            }
+            const sign = numericValue >= 0 ? "+" : "";
+            return `${sign}${numericValue.toFixed(2)}%`;
         },
 
         isPositive(change) {
-            return change >= 0;
+            const numericValue = Number(change);
+            if (!Number.isFinite(numericValue)) {
+                return false;
+            }
+            return numericValue >= 0;
         },
 
         getChangeColor(change) {
-            return change >= 0
+            const numericValue = Number(change);
+            if (!Number.isFinite(numericValue)) {
+                return "bg-slate-500/10 text-slate-400";
+            }
+            return numericValue >= 0
                 ? "bg-emerald-500/10 text-emerald-400"
                 : "bg-red-500/10 text-red-400";
         },

@@ -257,12 +257,24 @@
 
                                 {{-- Mini Chart Sparkline --}}
                                 <svg viewBox="0 0 120 32" class="mt-2 h-8 w-full" preserveAspectRatio="none">
-                                    <template x-if="isPositive(market.change24h)">
-                                        <polyline points="0,24 15,22 30,25 45,16 60,18 75,10 90,14 105,6 120,9" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                                    </template>
-                                    <template x-if="!isPositive(market.change24h)">
-                                        <polyline points="0,8 15,10 30,7 45,15 60,13 75,20 90,17 105,24 120,22" fill="none" stroke="#f87171" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                                    </template>
+                                    <polyline 
+                                        points="0,24 15,22 30,25 45,16 60,18 75,10 90,14 105,6 120,9" 
+                                        fill="none" 
+                                        stroke="#34d399" 
+                                        stroke-width="2" 
+                                        stroke-linecap="round" 
+                                        stroke-linejoin="round"
+                                        :style="isPositive(market.change24h) ? 'display: block;' : 'display: none;'" 
+                                    />
+                                    <polyline 
+                                        points="0,8 15,10 30,7 45,15 60,13 75,20 90,17 105,24 120,22" 
+                                        fill="none" 
+                                        stroke="#f87171" 
+                                        stroke-width="2" 
+                                        stroke-linecap="round" 
+                                        stroke-linejoin="round"
+                                        :style="!isPositive(market.change24h) ? 'display: block;' : 'display: none;'" 
+                                    />
                                 </svg>
                             </div>
                         </template>
