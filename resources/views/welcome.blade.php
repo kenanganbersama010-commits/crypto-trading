@@ -191,29 +191,29 @@
                                         <p class="text-xs text-slate-500">Bitcoin</p>
                                     </div>
                                 </div>
-                                <span class="rounded-lg px-2 py-1 text-xs font-semibold" :class="getChangeColor(market.change24h)" x-text="formatChange(market.change24h)"></span>
+                                <span class="rounded-lg px-2 py-1 text-xs font-semibold" :class="market ? getChangeColor(market.change24h) : 'bg-slate-500/10 text-slate-400'" x-text="market ? formatChange(market.change24h) : 'Loading...'"></span>
                             </div>
 
                             <p class="mt-4 text-3xl font-bold tracking-tight text-white">
-                                $<span x-text="formatPrice(market.price)"></span>
+                                $<span x-text="market ? formatPrice(market.price) : 'Loading...'"></span>
                             </p>
 
                             {{-- Mini area chart --}}
                             <svg viewBox="0 0 300 80" class="mt-4 h-20 w-full" preserveAspectRatio="none">
                                 <defs>
                                     <linearGradient id="heroChartFill" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="0%" :stop-color="isPositive(market.change24h) ? '#34d399' : '#f87171'" stop-opacity="0.35" />
-                                        <stop offset="100%" :stop-color="isPositive(market.change24h) ? '#34d399' : '#f87171'" stop-opacity="0" />
+                                        <stop offset="0%" :stop-color="market && isPositive(market.change24h) ? '#34d399' : '#f87171'" stop-opacity="0.35" />
+                                        <stop offset="100%" :stop-color="market && isPositive(market.change24h) ? '#34d399' : '#f87171'" stop-opacity="0" />
                                     </linearGradient>
                                 </defs>
                                 <path 
-                                    :d="isPositive(market.change24h) ? 'M0,55 L25,50 L50,58 L75,40 L100,45 L125,30 L150,35 L175,20 L200,28 L225,15 L250,22 L275,10 L300,18 L300,80 L0,80 Z' : 'M0,25 L25,30 L50,22 L75,40 L100,35 L125,50 L150,45 L175,60 L200,52 L225,65 L250,58 L275,70 L300,62 L300,80 L0,80 Z'" 
+                                    :d="market && isPositive(market.change24h) ? 'M0,55 L25,50 L50,58 L75,40 L100,45 L125,30 L150,35 L175,20 L200,28 L225,15 L250,22 L275,10 L300,18 L300,80 L0,80 Z' : 'M0,25 L25,30 L50,22 L75,40 L100,35 L125,50 L150,45 L175,60 L200,52 L225,65 L250,58 L275,70 L300,62 L300,80 L0,80 Z'" 
                                     fill="url(#heroChartFill)" 
                                 />
                                 <polyline 
-                                    :points="isPositive(market.change24h) ? '0,55 25,50 50,58 75,40 100,45 125,30 150,35 175,20 200,28 225,15 250,22 275,10 300,18' : '0,25 25,30 50,22 75,40 100,35 125,50 150,45 175,60 200,52 225,65 250,58 275,70 300,62'" 
+                                    :points="market && isPositive(market.change24h) ? '0,55 25,50 50,58 75,40 100,45 125,30 150,35 175,20 200,28 225,15 250,22 275,10 300,18' : '0,25 25,30 50,22 75,40 100,35 125,50 150,45 175,60 200,52 225,65 250,58 275,70 300,62'" 
                                     fill="none" 
-                                    :stroke="isPositive(market.change24h) ? '#34d399' : '#f87171'" 
+                                    :stroke="market && isPositive(market.change24h) ? '#34d399' : '#f87171'" 
                                     stroke-width="2" 
                                     stroke-linecap="round" 
                                     stroke-linejoin="round" 
@@ -223,11 +223,11 @@
                             <div class="mt-4 grid grid-cols-2 gap-3 border-t border-white/10 pt-4">
                                 <div class="rounded-xl bg-white/5 px-3 py-2">
                                     <p class="text-[11px] text-slate-500">24h High</p>
-                                    <p class="mt-0.5 text-sm font-semibold text-white">$<span x-text="formatPrice(market.high24h)"></span></p>
+                                    <p class="mt-0.5 text-sm font-semibold text-white">$<span x-text="market ? formatPrice(market.high24h) : 'Loading...'"></span></p>
                                 </div>
                                 <div class="rounded-xl bg-white/5 px-3 py-2">
                                     <p class="text-[11px] text-slate-500">24h Low</p>
-                                    <p class="mt-0.5 text-sm font-semibold text-white">$<span x-text="formatPrice(market.low24h)"></span></p>
+                                    <p class="mt-0.5 text-sm font-semibold text-white">$<span x-text="market ? formatPrice(market.low24h) : 'Loading...'"></span></p>
                                 </div>
                             </div>
                         </div>
