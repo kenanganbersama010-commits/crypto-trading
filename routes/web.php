@@ -14,6 +14,8 @@ Route::get('/', function () {
 Route::prefix('api/market')->group(function () {
     Route::get('/ticker', [App\Http\Controllers\Api\MarketController::class, 'ticker'])->name('api.market.ticker');
     Route::get('/tickers', [App\Http\Controllers\Api\MarketController::class, 'tickers'])->name('api.market.tickers');
+    Route::get('/klines', [App\Http\Controllers\Api\MarketController::class, 'klines'])->name('api.market.klines');
+    Route::get('/websocket', [App\Http\Controllers\Api\MarketController::class, 'websocket'])->name('api.market.websocket');
     Route::get('/health', [App\Http\Controllers\Api\MarketController::class, 'health'])->name('api.market.health');
 });
 

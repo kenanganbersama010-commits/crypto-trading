@@ -37,6 +37,7 @@ return [
 
     'binance' => [
         'api_url' => env('BINANCE_API_URL', 'https://api.binance.com'),
+        'ws_url' => env('BINANCE_WS_URL', 'wss://stream.binance.com:9443'),
         'cache_ttl' => env('BINANCE_CACHE_TTL', 30), // seconds
         'timeout' => env('BINANCE_TIMEOUT', 5), // seconds
     ],

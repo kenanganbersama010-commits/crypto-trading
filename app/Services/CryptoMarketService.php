@@ -319,4 +319,207 @@ class CryptoMarketService
             return false;
         }
     }
+
+    /**
+     * Get historical kline/candlestick data
+     *
+     * @param string $symbol e.g., 'BTCUSDT'
+     * @param string $interval e.g., '1m', '5m', '15m', '1h', '4h', '1d'
+     * @param int $limit Number of candles (default: 100, max: 1000)
+     * @return array|null
+     */
+    public function getKlines(string $symbol, string $interval = '1m', int $limit = 100): ?array
+    {
+        $symbol = strtoupper($symbol);
+
+        // Validate symbol
+        if (!preg_match('/^[A-Z0-9]+$/', $symbol)) {
+            Log::warning('Invalid symbol format', ['symbol' => $symbol]);
+            return null;
+        }
+
+        // Validate interval
+        $validIntervals = ['1m', '3m', '5m', '15m', '30m', '1h', '2h', '4h', '6h', '8h', '12h', '1d', '3d', '1w', '1M'];
+        if (!in_array($interval, $validIntervals)) {
+            Log::warning('Invalid interval', ['interval' => $interval]);
+            return null;
+        }
+
+        // Limit between 1 and 1000
+        $limit = max(1, min(1000, $limit));
+
+        $cacheKey = "crypto_klines_{$symbol}_{$interval}_{$limit}";
+
+        return Cache::remember($cacheKey, $this->cacheTtl, function () use ($symbol, $interval, $limit) {
+            return $this->fetchKlines($symbol, $interval, $limit);
+        });
+    }
+
+    /**
+     * Fetch klines from Binance API
+     *
+     * @param string $symbol
+     * @param string $interval
+     * @param int $limit
+     * @return array|null
+     */
+    protected function fetchKlines(string $symbol, string $interval, int $limit): ?array
+    {
+        try {
+            $response = Http::timeout($this->timeout)
+                ->connectTimeout(3)
+                ->get("{$this->baseUrl}/api/v3/klines", [
+                    'symbol' => $symbol,
+                    'interval' => $interval,
+                    'limit' => $limit
+                ]);
+
+            if ($response->successful()) {
+                $data = $response->json();
+                return $this->normalizeKlines($data);
+            }
+
+            Log::warning('Binance klines API error', [
+                'symbol' => $symbol,
+                'interval' => $interval,
+                'status' => $response->status(),
+            ]);
+
+            return null;
+        } catch (\Illuminate\Http\Client\ConnectionException $e) {
+            Log::error('Binance klines API connection timeout', [
+                'symbol' => $symbol,
+                'interval' => $interval,
+                'message' => 'Connection timeout or network error'
+            ]);
+            return null;
+        } catch (\Exception $e) {
+            Log::error('Binance klines API exception', [
+                'symbol' => $symbol,
+                'interval' => $interval,
+                'message' => $e->getMessage()
+            ]);
+            return null;
+        }
+    }
+
+    /**
+     * Normalize klines data to internal format
+     *
+     * @param array $data
+     * @return array
+     */
+    protected function normalizeKlines(array $data): array
+    {
+        $normalized = [];
+
+        foreach ($data as $kline) {
+            // Binance kline format:
+            // [
+            //   0: Open time
+            //   1: Open
+            //   2: High
+            //   3: Low
+            //   4: Close
+            //   5: Volume
+            //   6: Close time
+            //   7: Quote asset volume
+            //   8: Number of trades
+            //   9: Taker buy base asset volume
+            //   10: Taker buy quote asset volume
+            //   11: Ignore
+            // ]
+            $normalized[] = [
+                'time' => (int) ($kline[0] / 1000), // Convert to seconds
+                'open' => (float) $kline[1],
+                'high' => (float) $kline[2],
+                'low' => (float) $kline[3],
+                'close' => (float) $kline[4],
+                'volume' => (float) $kline[5],
+            ];
+        }
+
+        return $normalized;
+    }
+
+    /**
+     * Get WebSocket URL for symbol stream
+     *
+     * @param string $symbol
+     * @param string $stream e.g., 'ticker', 'kline_1m'
+     * @return string
+     */
+    public function getWebSocketUrl(string $symbol, string $stream = 'ticker'): string
+    {
+        $wsBaseUrl = config('services.binance.ws_url', 'wss://stream.binance.com:9443');
+        $symbolLower = strtolower($symbol);
+        
+        return "{$wsBaseUrl}/ws/{$symbolLower}@{$stream}";
+    }
+
+    /**
+     * Get fallback klines data
+     *
+     * @param string $symbol
+     * @param int $limit
+     * @return array|null
+     */
+    public function getFallbackKlines(string $symbol, int $limit = 100): ?array
+    {
+        // Generate realistic-looking demo candles based on current fallback price
+        $fallbackTicker = $this->getFallbackData($symbol);
+        
+        if (!$fallbackTicker) {
+            return null;
+        }
+
+        $currentPrice = $fallbackTicker['price'];
+        $candles = [];
+        $timestamp = time() - ($limit * 60); // Start from $limit minutes ago
+
+        for ($i = 0; $i < $limit; $i++) {
+            $variance = ($currentPrice * 0.002); // 0.2% variance
+            $open = $currentPrice + (mt_rand(-100, 100) / 100) * $variance;
+            $high = $open + (mt_rand(0, 100) / 100) * $variance;
+            $low = $open - (mt_rand(0, 100) / 100) * $variance;
+            $close = $open + (mt_rand(-100, 100) / 100) * $variance;
+
+            // Ensure high is highest and low is lowest
+            $high = max($high, $open, $close);
+            $low = min($low, $open, $close);
+
+            $candles[] = [
+                'time' => $timestamp + ($i * 60),
+                'open' => round($open, 2),
+                'high' => round($high, 2),
+                'low' => round($low, 2),
+                'close' => round($close, 2),
+                'volume' => mt_rand(100, 1000),
+            ];
+
+            $currentPrice = $close; // Next candle starts from previous close
+        }
+
+        return $candles;
+    }
+
+    /**
+     * Get klines with fallback support
+     *
+     * @param string $symbol
+     * @param string $interval
+     * @param int $limit
+     * @param bool $allowFallback
+     * @return array|null
+     */
+    public function getKlinesWithFallback(string $symbol, string $interval = '1m', int $limit = 100, bool $allowFallback = true): ?array
+    {
+        $klines = $this->getKlines($symbol, $interval, $limit);
+
+        if (!$klines && $allowFallback) {
+            return $this->getFallbackKlines($symbol, $limit);
+        }
+
+        return $klines;
+    }
 }

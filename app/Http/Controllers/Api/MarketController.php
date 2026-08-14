@@ -140,4 +140,87 @@ class MarketController extends Controller
             'timestamp' => now()->toIso8601String(),
         ], $isAvailable ? 200 : 503);
     }
+
+    /**
+     * Get historical kline/candlestick data
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function klines(Request $request): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'symbol' => 'required|string|regex:/^[A-Z0-9]+$/|max:20',
+            'interval' => 'nullable|string|in:1m,3m,5m,15m,30m,1h,2h,4h,6h,8h,12h,1d,3d,1w,1M',
+            'limit' => 'nullable|integer|min:1|max:1000',
+            'fallback' => 'nullable|boolean',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid request parameters',
+                'errors' => $validator->errors(),
+            ], 400);
+        }
+
+        $symbol = strtoupper($request->input('symbol'));
+        $interval = $request->input('interval', '1m');
+        $limit = $request->input('limit', 100);
+        $allowFallback = $request->input('fallback', true);
+
+        $klines = $this->marketService->getKlinesWithFallback($symbol, $interval, $limit, $allowFallback);
+
+        if (!$klines) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Historical market data temporarily unavailable for this symbol',
+                'data' => [],
+            ], 503);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Historical market data retrieved successfully',
+            'data' => $klines,
+            'count' => count($klines),
+        ]);
+    }
+
+    /**
+     * Get WebSocket connection info
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function websocket(Request $request): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'symbol' => 'required|string|regex:/^[A-Z0-9]+$/|max:20',
+            'stream' => 'nullable|string|in:ticker,kline_1m,kline_5m,kline_15m,kline_1h',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid request parameters',
+                'errors' => $validator->errors(),
+            ], 400);
+        }
+
+        $symbol = $request->input('symbol');
+        $stream = $request->input('stream', 'ticker');
+
+        $wsUrl = $this->marketService->getWebSocketUrl($symbol, $stream);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'WebSocket connection info retrieved',
+            'data' => [
+                'url' => $wsUrl,
+                'symbol' => strtoupper($symbol),
+                'stream' => $stream,
+            ],
+        ]);
+    }
 }

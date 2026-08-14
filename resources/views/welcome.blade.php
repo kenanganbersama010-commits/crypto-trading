@@ -305,48 +305,102 @@
                 </div>
             </section>
 
-            {{-- ========================= TRADING TERMINAL PREVIEW ========================= --}}
-            <section id="trading" class="scroll-mt-16 border-t border-white/10 bg-slate-950 py-16 sm:py-20">
+            {{-- ========================= LIVE MARKET CHART ========================= --}}
+            <section id="trading" class="scroll-mt-16 border-t border-white/10 bg-slate-950 py-16 sm:py-20" x-data="liveMarket()" x-init="init()">
                 <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                    <div class="max-w-2xl">
-                        <h2 class="text-2xl font-bold text-white sm:text-3xl">A Trading Terminal Built for Clarity</h2>
-                        <p class="mt-2 text-sm text-slate-400 sm:text-base">A preview of the trading interface — sign in to access your own.</p>
+                    <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                        <div class="max-w-2xl">
+                            <h2 class="text-2xl font-bold text-white sm:text-3xl">Live Market Chart</h2>
+                            <p class="mt-2 text-sm text-slate-400 sm:text-base">Real-time candlestick chart with live price updates.</p>
+                        </div>
+                        
+                        {{-- Connection Status --}}
+                        <div class="flex items-center gap-2">
+                            <span class="h-2 w-2 rounded-full" :class="statusDot"></span>
+                            <span class="text-xs font-medium" :class="statusColor" x-text="statusText"></span>
+                        </div>
                     </div>
 
-                    <div class="mt-8 rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-6">
+                    {{-- Loading State --}}
+                    <div x-show="isLoading" class="mt-8 rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-6">
+                        <div class="flex items-center justify-center py-20">
+                            <div class="flex flex-col items-center gap-3">
+                                <div class="h-8 w-8 animate-spin rounded-full border-2 border-white/10 border-t-violet-500"></div>
+                                <p class="text-sm text-slate-400">Loading market data...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Error State --}}
+                    <div x-show="!isLoading && error" x-cloak class="mt-8 rounded-2xl border border-red-500/20 bg-red-500/5 p-4 sm:p-6">
+                        <div class="flex flex-col items-center justify-center py-12 text-center">
+                            <svg class="h-12 w-12 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                            <p class="mt-3 text-sm font-semibold text-white">Market data temporarily unavailable</p>
+                            <p class="mt-1 text-xs text-slate-400" x-text="error"></p>
+                        </div>
+                    </div>
+
+                    {{-- Chart Container --}}
+                    <div x-show="!isLoading && !error" x-cloak class="mt-8 rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-6">
+                        {{-- Market Header --}}
                         <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                             <div class="flex items-center gap-3">
                                 <span class="flex h-10 w-10 items-center justify-center rounded-full bg-amber-500/15 text-sm font-bold text-amber-400">₿</span>
                                 <div>
-                                    <p class="text-base font-semibold text-white">BTC / USDT</p>
+                                    <p class="text-base font-semibold text-white" x-text="symbol"></p>
                                     <p class="text-xs text-slate-500">Bitcoin</p>
                                 </div>
                             </div>
-                            <div class="flex items-center gap-4">
-                                <p class="text-2xl font-bold text-white">$62,802.29</p>
-                                <span class="rounded-lg bg-emerald-500/10 px-2 py-1 text-xs font-semibold text-emerald-400">+1.24%</span>
+                            <div class="flex flex-wrap items-center gap-4">
+                                <div class="text-right">
+                                    <p class="text-2xl font-bold text-white">$<span x-text="formatPrice(price)"></span></p>
+                                    <p class="text-xs" :class="priceChangeColor">
+                                        <span x-text="priceChangePercent >= 0 ? '+' : ''"></span><span x-text="priceChangePercent.toFixed(2)"></span>%
+                                    </p>
+                                </div>
+                                <span class="rounded-lg px-2 py-1 text-xs font-semibold" :class="priceChangeBg + ' ' + priceChangeColor">
+                                    <span x-text="priceChangePercent >= 0 ? '+' : ''"></span><span x-text="priceChangePercent.toFixed(2)"></span>%
+                                </span>
                             </div>
                         </div>
 
-                        {{-- large area chart --}}
-                        <svg viewBox="0 0 800 220" class="mt-6 h-48 w-full sm:h-56" preserveAspectRatio="none">
-                            <defs>
-                                <linearGradient id="terminalChartFill" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="0%" stop-color="#8b5cf6" stop-opacity="0.35" />
-                                    <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0" />
-                                </linearGradient>
-                            </defs>
-                            <path d="M0,150 L50,140 L100,160 L150,110 L200,130 L250,80 L300,100 L350,60 L400,90 L450,50 L500,70 L550,40 L600,65 L650,30 L700,55 L750,20 L800,45 L800,220 L0,220 Z" fill="url(#terminalChartFill)" />
-                            <polyline points="0,150 50,140 100,160 150,110 200,130 250,80 300,100 350,60 400,90 450,50 500,70 550,40 600,65 650,30 700,55 750,20 800,45" fill="none" stroke="#a78bfa" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
-                        </svg>
+                        {{-- Market Stats --}}
+                        <div class="mt-4 grid grid-cols-3 gap-3 border-t border-white/10 pt-4 sm:grid-cols-4">
+                            <div class="rounded-xl bg-white/5 px-3 py-2">
+                                <p class="text-[11px] text-slate-500">24h High</p>
+                                <p class="mt-0.5 text-sm font-semibold text-white">$<span x-text="formatPrice(high24h)"></span></p>
+                            </div>
+                            <div class="rounded-xl bg-white/5 px-3 py-2">
+                                <p class="text-[11px] text-slate-500">24h Low</p>
+                                <p class="mt-0.5 text-sm font-semibold text-white">$<span x-text="formatPrice(low24h)"></span></p>
+                            </div>
+                            <div class="rounded-xl bg-white/5 px-3 py-2">
+                                <p class="text-[11px] text-slate-500">24h Volume</p>
+                                <p class="mt-0.5 text-sm font-semibold text-white"><span x-text="formatVolume(volume24h)"></span></p>
+                            </div>
+                            <div class="hidden rounded-xl bg-white/5 px-3 py-2 sm:block">
+                                <p class="text-[11px] text-slate-500">Timeframe</p>
+                                <p class="mt-0.5 text-sm font-semibold text-white" x-text="interval"></p>
+                            </div>
+                        </div>
 
-                        <div class="mt-6 grid grid-cols-2 gap-3 sm:max-w-xs">
-                            <button type="button" class="rounded-xl bg-emerald-500/90 px-4 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90">
-                                Buy
-                            </button>
-                            <button type="button" class="rounded-xl bg-red-500/90 px-4 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90">
-                                Sell
-                            </button>
+                        {{-- Chart --}}
+                        <div class="mt-6">
+                            <div id="live-chart" class="h-64 w-full sm:h-96"></div>
+                        </div>
+
+                        {{-- Disclaimer --}}
+                        <div class="mt-4 border-t border-white/10 pt-4">
+                            <p class="text-xs text-slate-500 text-center">
+                                <template x-if="isConnected">
+                                    <span>Live market data powered by Binance. <span class="text-emerald-400">● Connected</span></span>
+                                </template>
+                                <template x-if="!isConnected">
+                                    <span>Market data service is currently unavailable. Using demo data.</span>
+                                </template>
+                            </p>
                         </div>
                     </div>
                 </div>
