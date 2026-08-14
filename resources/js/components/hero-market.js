@@ -116,7 +116,7 @@ export function heroMarket() {
         formatPrice(price) {
             const numericValue = Number(price);
             if (!Number.isFinite(numericValue) || numericValue <= 0) {
-                return "0.00";
+                return "Loading...";
             }
 
             return new Intl.NumberFormat("en-US", {
@@ -128,7 +128,7 @@ export function heroMarket() {
         formatChange(change) {
             const numericValue = Number(change);
             if (!Number.isFinite(numericValue)) {
-                return "0.00%";
+                return "Loading...";
             }
             const sign = numericValue >= 0 ? "+" : "";
             return `${sign}${numericValue.toFixed(2)}%`;
@@ -137,7 +137,7 @@ export function heroMarket() {
         isPositive(change) {
             const numericValue = Number(change);
             if (!Number.isFinite(numericValue)) {
-                return false;
+                return true; // Default to positive for loading state
             }
             return numericValue >= 0;
         },
