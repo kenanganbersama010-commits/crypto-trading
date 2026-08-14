@@ -7,8 +7,8 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return redirect()->route('login');
-});
+    return view('welcome');
+})->name('welcome');
 
 Route::middleware(['auth', 'verified', 'role:user', 'account.active'])->group(function () {
     Route::get('/dashboard', function () {
