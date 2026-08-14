@@ -1,9 +1,9 @@
 /**
  * Market Chart Manager
- * Handles candlestick chart rendering and updates using Lightweight Charts
+ * Handles candlestick chart rendering and updates using Lightweight Charts v5
  */
 
-import { createChart } from "lightweight-charts";
+import { createChart, ColorType } from "lightweight-charts";
 
 export class MarketChart {
     constructor(containerId, options = {}) {
@@ -22,10 +22,10 @@ export class MarketChart {
     }
 
     initChart() {
-        // Chart options with dark theme
+        // Chart options with dark theme (v5 API)
         const chartOptions = {
             layout: {
-                background: { color: "transparent" },
+                background: { type: ColorType.Solid, color: "transparent" },
                 textColor: "#94a3b8",
             },
             grid: {
@@ -63,7 +63,7 @@ export class MarketChart {
 
         this.chart = createChart(this.container, chartOptions);
 
-        // Candlestick series options
+        // Candlestick series options (v5 API uses addSeries instead of addCandlestickSeries)
         const candlestickOptions = {
             upColor: "#10b981",
             downColor: "#ef4444",
@@ -73,12 +73,19 @@ export class MarketChart {
             wickDownColor: "#ef4444",
         };
 
-        this.candlestickSeries =
-            this.chart.addCandlestickSeries(candlestickOptions);
+        // V5 API: Use addSeries with type 'Candlestick'
+        this.candlestickSeries = this.chart.addSeries(
+            "Candlestick",
+            candlestickOptions,
+        );
 
         // Handle resize
         this.handleResize();
         window.addEventListener("resize", () => this.handleResize());
+
+        console.log(
+            "[Market Chart] Chart initialized with Lightweight Charts v5",
+        );
     }
 
     handleResize() {
@@ -104,6 +111,8 @@ export class MarketChart {
 
         // Fit content
         this.chart.timeScale().fitContent();
+
+        console.log(`[Market Chart] Set ${candles.length} candles`);
     }
 
     updateCandle(newCandleData) {
@@ -124,40 +133,6 @@ export class MarketChart {
         // Add new candle
         this.candlestickSeries.update(newCandleData);
         this.currentCandle = { ...newCandleData };
-    }
-
-    updateFromTicker(tickerData) {
-        if (!this.currentCandle) {
-            return;
-        }
-
-        const currentTime = Math.floor(Date.now() / 1000);
-        const intervalSeconds = this.getIntervalSeconds();
-        const candleStartTime =
-            Math.floor(currentTime / intervalSeconds) * intervalSeconds;
-
-        // Check if we need a new candle
-        if (this.currentCandle.time < candleStartTime) {
-            // Create new candle
-            const newCandle = {
-                time: candleStartTime,
-                open: tickerData.price,
-                high: tickerData.price,
-                low: tickerData.price,
-                close: tickerData.price,
-            };
-            this.addCandle(newCandle);
-        } else {
-            // Update current candle
-            const updatedCandle = {
-                time: this.currentCandle.time,
-                open: this.currentCandle.open,
-                high: Math.max(this.currentCandle.high, tickerData.price),
-                low: Math.min(this.currentCandle.low, tickerData.price),
-                close: tickerData.price,
-            };
-            this.updateCandle(updatedCandle);
-        }
     }
 
     updateFromKline(klineData) {

@@ -105,10 +105,10 @@ export function liveMarket() {
         connectWebSocket() {
             this.ws = new MarketWebSocket({
                 symbol: this.symbol,
-                stream: "ticker",
+                stream: "kline_1m", // Use kline stream for candlestick data
 
                 onMessage: (data) => {
-                    this.handleTickerUpdate(data);
+                    this.handleKlineUpdate(data);
                 },
 
                 onStatusChange: (status) => {
@@ -134,21 +134,25 @@ export function liveMarket() {
             this.ws.connect();
         },
 
-        handleTickerUpdate(data) {
-            // Binance ticker stream format
-            if (data.e === "24hrTicker") {
-                this.price = parseFloat(data.c);
-                this.priceChange = parseFloat(data.p);
-                this.priceChangePercent = parseFloat(data.P);
-                this.high24h = parseFloat(data.h);
-                this.low24h = parseFloat(data.l);
-                this.volume24h = parseFloat(data.v);
+        handleKlineUpdate(data) {
+            // Binance kline stream format
+            if (data.e === "kline" && data.k) {
+                const kline = data.k;
+
+                // Update ticker stats from kline
+                this.price = parseFloat(kline.c);
+                this.priceChange = parseFloat(kline.c) - parseFloat(kline.o);
+                this.priceChangePercent =
+                    ((parseFloat(kline.c) - parseFloat(kline.o)) /
+                        parseFloat(kline.o)) *
+                    100;
+                this.high24h = parseFloat(kline.h);
+                this.low24h = parseFloat(kline.l);
+                this.volume24h = parseFloat(kline.v);
 
                 // Update chart if available
                 if (this.chartManager) {
-                    this.chartManager.updateFromTicker({
-                        price: this.price,
-                    });
+                    this.chartManager.updateFromKline(kline);
                 }
             }
         },

@@ -449,9 +449,9 @@ class CryptoMarketService
      * @param string $stream e.g., 'ticker', 'kline_1m'
      * @return string
      */
-    public function getWebSocketUrl(string $symbol, string $stream = 'ticker'): string
+    public function getWebSocketUrl(string $symbol, string $stream = 'kline_1m'): string
     {
-        $wsBaseUrl = config('services.binance.ws_url', 'wss://stream.binance.com:9443');
+        $wsBaseUrl = config('services.binance.ws_url', 'wss://data-stream.binance.vision:443');
         $symbolLower = strtolower($symbol);
         
         return "{$wsBaseUrl}/ws/{$symbolLower}@{$stream}";
