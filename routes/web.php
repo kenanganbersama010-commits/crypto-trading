@@ -10,6 +10,13 @@ Route::get('/', function () {
     return view('welcome');
 })->name('welcome');
 
+// Market Data API Routes (Public - Read-only)
+Route::prefix('api/market')->group(function () {
+    Route::get('/ticker', [App\Http\Controllers\Api\MarketController::class, 'ticker'])->name('api.market.ticker');
+    Route::get('/tickers', [App\Http\Controllers\Api\MarketController::class, 'tickers'])->name('api.market.tickers');
+    Route::get('/health', [App\Http\Controllers\Api\MarketController::class, 'health'])->name('api.market.health');
+});
+
 Route::middleware(['auth', 'verified', 'role:user', 'account.active'])->group(function () {
     Route::get('/dashboard', function () {
         return view('users.dashboard');

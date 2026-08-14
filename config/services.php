@@ -35,4 +35,10 @@ return [
         ],
     ],
 
+    'binance' => [
+        'api_url' => env('BINANCE_API_URL', 'https://api.binance.com'),
+        'cache_ttl' => env('BINANCE_CACHE_TTL', 30), // seconds
+        'timeout' => env('BINANCE_TIMEOUT', 5), // seconds
+    ],
+
 ];
