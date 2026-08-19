@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\SystemSetting;
 use App\Models\ApiCredential;
+use App\Services\BinanceAuthService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -111,5 +112,26 @@ class SettingsController extends Controller
             ->delete();
 
         return back()->with('status', 'binance-api-deleted');
+    }
+    
+    /**
+     * Test Binance API connection with stored credentials.
+     */
+    public function testBinanceConnection(BinanceAuthService $binanceAuth)
+    {
+        $result = $binanceAuth->testConnection();
+        
+        if ($result['success']) {
+            return response()->json([
+                'success' => true,
+                'message' => $result['message'],
+                'account' => $result['account'] ?? null,
+            ]);
+        }
+        
+        return response()->json([
+            'success' => false,
+            'message' => $result['message'],
+        ], 400);
     }
 }

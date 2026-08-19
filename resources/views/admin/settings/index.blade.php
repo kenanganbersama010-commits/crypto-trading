@@ -161,7 +161,38 @@
             </div>
 
             <!-- Binance API Settings Card -->
-            <div class="bg-white rounded-2xl shadow-lg shadow-gray-200/50 border border-gray-100 overflow-hidden">
+            <div 
+                class="bg-white rounded-2xl shadow-lg shadow-gray-200/50 border border-gray-100 overflow-hidden"
+                x-data="{
+                    testing: false,
+                    testResult: null,
+                    testConnection() {
+                        this.testing = true;
+                        this.testResult = null;
+                        
+                        fetch('{{ route('admin.settings.binance-api.test') }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                                'Accept': 'application/json',
+                            },
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            this.testing = false;
+                            this.testResult = data;
+                        })
+                        .catch(error => {
+                            this.testing = false;
+                            this.testResult = {
+                                success: false,
+                                message: 'Connection failed. Please try again.'
+                            };
+                        });
+                    }
+                }"
+            >
                 <div class="border-b border-gray-100 px-6 py-5 bg-gradient-to-r from-gray-50 to-white">
                     <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
                         <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
@@ -219,7 +250,54 @@
                             @endif
                         </div>
 
-                        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between pt-2 gap-3">
+                        <!-- Test Connection Button & Result -->
+                        @if($apiCredential)
+                            <div class="border-t border-gray-200 pt-4">
+                                <button 
+                                    type="button"
+                                    @click="testConnection()"
+                                    :disabled="testing"
+                                    class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold px-6 py-3 rounded-lg shadow-sm transition-all"
+                                >
+                                    <svg x-show="!testing" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                    <svg x-show="testing" class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    <span x-text="testing ? 'Testing...' : 'Test Connection'"></span>
+                                </button>
+                                
+                                <!-- Test Result -->
+                                <div x-show="testResult" class="mt-4">
+                                    <!-- Success Result -->
+                                    <div x-show="testResult && testResult.success" class="bg-emerald-50 border border-emerald-200 rounded-lg p-4">
+                                        <div class="flex items-start gap-3">
+                                            <svg class="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                            <div class="flex-1">
+                                                <p class="text-sm font-semibold text-emerald-900" x-text="testResult.message"></p>
+                                                <div x-show="testResult.account" class="mt-2 text-xs text-emerald-800 space-y-1">
+                                                    <p><span class="font-semibold">Can Trade:</span> <span x-text="testResult.account?.canTrade ? 'Yes' : 'No'"></span></p>
+                                                    <p><span class="font-semibold">Can Deposit:</span> <span x-text="testResult.account?.canDeposit ? 'Yes' : 'No'"></span></p>
+                                                    <p><span class="font-semibold">Can Withdraw:</span> <span x-text="testResult.account?.canWithdraw ? 'Yes' : 'No'"></span></p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Error Result -->
+                                    <div x-show="testResult && !testResult.success" class="bg-red-50 border border-red-200 rounded-lg p-4">
+                                        <div class="flex items-start gap-3">
+                                            <svg class="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                            <div>
+                                                <p class="text-sm font-semibold text-red-900" x-text="testResult.message"></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+
+                        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between pt-2 gap-3 border-t border-gray-200 mt-4">
                             @if($apiCredential)
                                 <form action="{{ route('admin.settings.binance-api.delete') }}" method="POST" class="w-full sm:w-auto" onsubmit="return confirm('Are you sure you want to delete the Binance API configuration?');">
                                     @csrf

@@ -52,6 +52,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])
         Route::post('/settings/dashboard-name', [SettingsController::class, 'updateDashboardName'])->name('admin.settings.dashboard-name');
         Route::post('/settings/profile-photo', [SettingsController::class, 'updateProfilePhoto'])->name('admin.settings.profile-photo');
         Route::post('/settings/binance-api', [SettingsController::class, 'updateBinanceApi'])->name('admin.settings.binance-api');
+        Route::post('/settings/binance-api/test', [SettingsController::class, 'testBinanceConnection'])->name('admin.settings.binance-api.test');
         Route::delete('/settings/binance-api', [SettingsController::class, 'deleteBinanceApi'])->name('admin.settings.binance-api.delete');
     });
 
