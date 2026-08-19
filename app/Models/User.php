@@ -29,6 +29,7 @@ class User extends Authenticatable
         'referral_code',
         'kyc_status',
         'account_status',
+        'profile_photo',
     ];
 
     /**

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AdjustmentHistoryController;
 use App\Http\Controllers\Admin\DepositController;
+use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -46,6 +47,12 @@ Route::middleware(['auth', 'verified', 'role:admin'])
         Route::get('/deposits/{deposit}', [DepositController::class, 'show'])->name('admin.deposits.show');
         Route::post('/deposits/{deposit}/approve', [DepositController::class, 'approve'])->name('admin.deposits.approve');
         Route::post('/deposits/{deposit}/reject', [DepositController::class, 'reject'])->name('admin.deposits.reject');
+
+        Route::get('/settings', [SettingsController::class, 'index'])->name('admin.settings.index');
+        Route::post('/settings/dashboard-name', [SettingsController::class, 'updateDashboardName'])->name('admin.settings.dashboard-name');
+        Route::post('/settings/profile-photo', [SettingsController::class, 'updateProfilePhoto'])->name('admin.settings.profile-photo');
+        Route::post('/settings/binance-api', [SettingsController::class, 'updateBinanceApi'])->name('admin.settings.binance-api');
+        Route::delete('/settings/binance-api', [SettingsController::class, 'deleteBinanceApi'])->name('admin.settings.binance-api.delete');
     });
 
 Route::middleware('auth')->group(function () {

@@ -136,7 +136,7 @@
                     <div>
                         <x-admin.nav-section title="Pengaturan" />
                         <div class="space-y-1">
-                            <x-admin.nav-item href="#" icon="settings">Pengaturan</x-admin.nav-item>
+                            <x-admin.nav-item href="{{ route('admin.settings.index') }}" icon="settings">Pengaturan</x-admin.nav-item>
                         </div>
                     </div>
                 </nav>
