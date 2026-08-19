@@ -32,6 +32,10 @@
                         @elseif (session('status') === 'profile-photo-updated') Profile photo updated successfully.
                         @elseif (session('status') === 'binance-api-updated') Binance API configuration updated successfully.
                         @elseif (session('status') === 'binance-api-deleted') Binance API configuration deleted successfully.
+                        @elseif (session('status') === 'indodax-api-updated') Indodax API configuration updated successfully.
+                        @elseif (session('status') === 'indodax-api-deleted') Indodax API configuration deleted successfully.
+                        @elseif (session('status') === 'coingecko-api-updated') CoinGecko API configuration updated successfully.
+                        @elseif (session('status') === 'coingecko-api-deleted') CoinGecko API configuration deleted successfully.
                         @else {{ session('status') }}
                         @endif
                     </p>
@@ -320,6 +324,321 @@
                             >
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                                 {{ $apiCredential ? 'Update Configuration' : 'Save Configuration' }}
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Indodax API Settings Card -->
+            <div 
+                class="bg-white rounded-2xl shadow-lg shadow-gray-200/50 border border-gray-100 overflow-hidden"
+                x-data="{
+                    testing: false,
+                    testResult: null,
+                    testConnection() {
+                        this.testing = true;
+                        this.testResult = null;
+                        
+                        fetch('{{ route('admin.settings.indodax-api.test') }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                                'Accept': 'application/json',
+                            },
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            this.testing = false;
+                            this.testResult = data;
+                        })
+                        .catch(error => {
+                            this.testing = false;
+                            this.testResult = {
+                                success: false,
+                                message: 'Connection failed. Please try again.'
+                            };
+                        });
+                    }
+                }"
+            >
+                <div class="border-b border-gray-100 px-6 py-5 bg-gradient-to-r from-gray-50 to-white">
+                    <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+                        Indodax API Configuration
+                    </h2>
+                    <p class="text-sm text-gray-600 mt-1">Configure your Indodax API credentials for Indonesian exchange access</p>
+                </div>
+
+                <form action="{{ route('admin.settings.indodax-api') }}" method="POST" class="p-6">
+                    @csrf
+                    <div class="space-y-4">
+                        <!-- Info Notice -->
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <div class="flex items-start gap-3">
+                                <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <div>
+                                    <p class="text-sm font-semibold text-blue-900">Indodax Exchange</p>
+                                    <p class="text-xs text-blue-800 mt-1">Indodax is a Bappebti-licensed Indonesian crypto exchange. Get your API credentials from <a href="https://indodax.com" target="_blank" class="underline hover:text-blue-900">indodax.com</a> account settings.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="indodax_api_key" class="block text-sm font-semibold text-gray-700 mb-2">
+                                API Key
+                            </label>
+                            <input 
+                                type="text" 
+                                id="indodax_api_key"
+                                name="api_key"
+                                value="{{ old('api_key', $indodaxCredential ? $indodaxCredential->masked_api_key : '') }}"
+                                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-500 focus:ring-opacity-20 outline-none transition-all text-gray-900 font-mono text-sm"
+                                placeholder="Enter your Indodax API Key"
+                                required
+                            >
+                            @if($indodaxCredential)
+                                <p class="text-xs text-gray-500 mt-2">Current API Key is masked for security.</p>
+                            @endif
+                        </div>
+
+                        <div>
+                            <label for="indodax_api_secret" class="block text-sm font-semibold text-gray-700 mb-2">
+                                API Secret
+                            </label>
+                            <input 
+                                type="password" 
+                                id="indodax_api_secret"
+                                name="api_secret"
+                                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-500 focus:ring-opacity-20 outline-none transition-all text-gray-900 font-mono text-sm"
+                                placeholder="{{ $indodaxCredential ? '••••••••••••••••' : 'Enter your Indodax API Secret' }}"
+                                required
+                            >
+                            @if($indodaxCredential)
+                                <p class="text-xs text-gray-500 mt-2">Enter new API Secret to update the existing one.</p>
+                            @endif
+                        </div>
+
+                        <!-- Test Connection Button & Result -->
+                        @if($indodaxCredential)
+                            <div class="border-t border-gray-200 pt-4">
+                                <button 
+                                    type="button"
+                                    @click="testConnection()"
+                                    :disabled="testing"
+                                    class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold px-6 py-3 rounded-lg shadow-sm transition-all"
+                                >
+                                    <svg x-show="!testing" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                    <svg x-show="testing" class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    <span x-text="testing ? 'Testing...' : 'Test Connection'"></span>
+                                </button>
+                                
+                                <!-- Test Result -->
+                                <div x-show="testResult" class="mt-4">
+                                    <!-- Success Result -->
+                                    <div x-show="testResult && testResult.success" class="bg-emerald-50 border border-emerald-200 rounded-lg p-4">
+                                        <div class="flex items-start gap-3">
+                                            <svg class="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                            <div class="flex-1">
+                                                <p class="text-sm font-semibold text-emerald-900" x-text="testResult.message"></p>
+                                                <div x-show="testResult.account" class="mt-2 text-xs text-emerald-800 space-y-1">
+                                                    <p><span class="font-semibold">Name:</span> <span x-text="testResult.account?.name"></span></p>
+                                                    <p><span class="font-semibold">Email:</span> <span x-text="testResult.account?.email"></span></p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Error Result -->
+                                    <div x-show="testResult && !testResult.success" class="bg-red-50 border border-red-200 rounded-lg p-4">
+                                        <div class="flex items-start gap-3">
+                                            <svg class="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                            <div>
+                                                <p class="text-sm font-semibold text-red-900" x-text="testResult.message"></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+
+                        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between pt-2 gap-3 border-t border-gray-200 mt-4">
+                            @if($indodaxCredential)
+                                <form action="{{ route('admin.settings.indodax-api.delete') }}" method="POST" class="w-full sm:w-auto" onsubmit="return confirm('Are you sure you want to delete the Indodax API configuration?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button 
+                                        type="submit"
+                                        class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-3 rounded-lg shadow-sm transition-all"
+                                    >
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                        Delete Configuration
+                                    </button>
+                                </form>
+                            @else
+                                <div></div>
+                            @endif
+                            
+                            <button 
+                                type="submit"
+                                class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-3 rounded-lg shadow-sm transition-all"
+                            >
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                {{ $indodaxCredential ? 'Update Configuration' : 'Save Configuration' }}
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- CoinGecko API Settings Card -->
+            <div 
+                class="bg-white rounded-2xl shadow-lg shadow-gray-200/50 border border-gray-100 overflow-hidden"
+                x-data="{
+                    testing: false,
+                    testResult: null,
+                    testConnection() {
+                        this.testing = true;
+                        this.testResult = null;
+                        
+                        fetch('{{ route('admin.settings.coingecko-api.test') }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                                'Accept': 'application/json',
+                            },
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            this.testing = false;
+                            this.testResult = data;
+                        })
+                        .catch(error => {
+                            this.testing = false;
+                            this.testResult = {
+                                success: false,
+                                message: 'Connection failed. Please try again.'
+                            };
+                        });
+                    }
+                }"
+            >
+                <div class="border-b border-gray-100 px-6 py-5 bg-gradient-to-r from-gray-50 to-white">
+                    <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        CoinGecko API Configuration
+                    </h2>
+                    <p class="text-sm text-gray-600 mt-1">Configure your CoinGecko API key for higher rate limits and better performance</p>
+                </div>
+
+                <form action="{{ route('admin.settings.coingecko-api') }}" method="POST" class="p-6">
+                    @csrf
+                    <div class="space-y-4">
+                        <!-- Info Notice -->
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                            <div class="flex items-start gap-3">
+                                <svg class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <div>
+                                    <p class="text-sm font-semibold text-green-900">CoinGecko API</p>
+                                    <p class="text-xs text-green-800 mt-1">CoinGecko provides free API keys for higher rate limits. Get your API key from <a href="https://www.coingecko.com/en/developers/dashboard" target="_blank" class="underline hover:text-green-900">CoinGecko Developer Dashboard</a>.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="coingecko_api_key" class="block text-sm font-semibold text-gray-700 mb-2">
+                                API Key (Demo/Pro)
+                            </label>
+                            <input 
+                                type="text" 
+                                id="coingecko_api_key"
+                                name="api_key"
+                                value="{{ old('api_key', $coingeckoCredential ? $coingeckoCredential->masked_api_key : '') }}"
+                                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-green-500 focus:ring-2 focus:ring-green-500 focus:ring-opacity-20 outline-none transition-all text-gray-900 font-mono text-sm"
+                                placeholder="Enter your CoinGecko API Key"
+                                required
+                            >
+                            @if($coingeckoCredential)
+                                <p class="text-xs text-gray-500 mt-2">Current API Key is masked for security.</p>
+                            @else
+                                <p class="text-xs text-gray-500 mt-2">CoinGecko API key only (no secret required).</p>
+                            @endif
+                        </div>
+
+                        <!-- Test Connection Button & Result -->
+                        @if($coingeckoCredential)
+                            <div class="border-t border-gray-200 pt-4">
+                                <button 
+                                    type="button"
+                                    @click="testConnection()"
+                                    :disabled="testing"
+                                    class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold px-6 py-3 rounded-lg shadow-sm transition-all"
+                                >
+                                    <svg x-show="!testing" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                    <svg x-show="testing" class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    <span x-text="testing ? 'Testing...' : 'Test Connection'"></span>
+                                </button>
+                                
+                                <!-- Test Result -->
+                                <div x-show="testResult" class="mt-4">
+                                    <!-- Success Result -->
+                                    <div x-show="testResult && testResult.success" class="bg-emerald-50 border border-emerald-200 rounded-lg p-4">
+                                        <div class="flex items-start gap-3">
+                                            <svg class="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                            <div class="flex-1">
+                                                <p class="text-sm font-semibold text-emerald-900" x-text="testResult.message"></p>
+                                                <div x-show="testResult.data" class="mt-2 text-xs text-emerald-800 space-y-1">
+                                                    <p><span class="font-semibold">Bitcoin Price:</span> <span x-text="testResult.data?.bitcoin_price"></span></p>
+                                                    <p><span class="font-semibold">API Status:</span> <span x-text="testResult.data?.api_status"></span></p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Error Result -->
+                                    <div x-show="testResult && !testResult.success" class="bg-red-50 border border-red-200 rounded-lg p-4">
+                                        <div class="flex items-start gap-3">
+                                            <svg class="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                            <div>
+                                                <p class="text-sm font-semibold text-red-900" x-text="testResult.message"></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+
+                        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between pt-2 gap-3 border-t border-gray-200 mt-4">
+                            @if($coingeckoCredential)
+                                <form action="{{ route('admin.settings.coingecko-api.delete') }}" method="POST" class="w-full sm:w-auto" onsubmit="return confirm('Are you sure you want to delete the CoinGecko API configuration?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button 
+                                        type="submit"
+                                        class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-3 rounded-lg shadow-sm transition-all"
+                                    >
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                        Delete Configuration
+                                    </button>
+                                </form>
+                            @else
+                                <div></div>
+                            @endif
+                            
+                            <button 
+                                type="submit"
+                                class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 rounded-lg shadow-sm transition-all"
+                            >
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                {{ $coingeckoCredential ? 'Update Configuration' : 'Save Configuration' }}
                             </button>
                         </div>
                     </div>

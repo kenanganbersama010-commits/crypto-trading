@@ -42,4 +42,14 @@ return [
         'timeout' => env('BINANCE_TIMEOUT', 5), // seconds
     ],
 
+    'indodax' => [
+        'base_url' => env('INDODAX_API_URL', 'https://indodax.com'),
+        'timeout' => env('INDODAX_TIMEOUT', 10), // seconds
+    ],
+
+    'coingecko' => [
+        'base_url' => env('COINGECKO_API_URL', 'https://api.coingecko.com/api/v3'),
+        'key' => env('COINGECKO_API_KEY'),
+    ],
+
 ];

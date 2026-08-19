@@ -51,9 +51,21 @@ Route::middleware(['auth', 'verified', 'role:admin'])
         Route::get('/settings', [SettingsController::class, 'index'])->name('admin.settings.index');
         Route::post('/settings/dashboard-name', [SettingsController::class, 'updateDashboardName'])->name('admin.settings.dashboard-name');
         Route::post('/settings/profile-photo', [SettingsController::class, 'updateProfilePhoto'])->name('admin.settings.profile-photo');
+        
+        // Binance API Routes
         Route::post('/settings/binance-api', [SettingsController::class, 'updateBinanceApi'])->name('admin.settings.binance-api');
         Route::post('/settings/binance-api/test', [SettingsController::class, 'testBinanceConnection'])->name('admin.settings.binance-api.test');
         Route::delete('/settings/binance-api', [SettingsController::class, 'deleteBinanceApi'])->name('admin.settings.binance-api.delete');
+        
+        // Indodax API Routes
+        Route::post('/settings/indodax-api', [SettingsController::class, 'updateIndodaxApi'])->name('admin.settings.indodax-api');
+        Route::post('/settings/indodax-api/test', [SettingsController::class, 'testIndodaxConnection'])->name('admin.settings.indodax-api.test');
+        Route::delete('/settings/indodax-api', [SettingsController::class, 'deleteIndodaxApi'])->name('admin.settings.indodax-api.delete');
+        
+        // CoinGecko API Routes
+        Route::post('/settings/coingecko-api', [SettingsController::class, 'updateCoingeckoApi'])->name('admin.settings.coingecko-api');
+        Route::post('/settings/coingecko-api/test', [SettingsController::class, 'testCoingeckoConnection'])->name('admin.settings.coingecko-api.test');
+        Route::delete('/settings/coingecko-api', [SettingsController::class, 'deleteCoingeckoApi'])->name('admin.settings.coingecko-api.delete');
     });
 
 Route::middleware('auth')->group(function () {
