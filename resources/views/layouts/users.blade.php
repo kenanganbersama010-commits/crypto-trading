@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+        <title>{{ \App\Models\SystemSetting::get('dashboard_name', 'Crypto Trading') }}</title>
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
@@ -33,7 +33,7 @@
             >
                 <div class="flex h-16 shrink-0 items-center px-6">
                     <span class="text-base font-semibold tracking-tight text-white">
-                        {{ config('app.name', 'Crypto Trading') }}
+                        {{ \App\Models\SystemSetting::get('dashboard_name', 'Crypto Trading') }}
                     </span>
                 </div>
 
@@ -113,9 +113,13 @@
                                 <p class="text-sm font-medium leading-tight text-gray-900">{{ Auth::user()->name }}</p>
                                 <p class="text-xs leading-tight text-gray-500">User</p>
                             </div>
-                            <div class="flex h-9 w-9 items-center justify-center rounded-full bg-violet-100 text-sm font-medium text-violet-700">
-                                {{ Str::of(Auth::user()->name)->substr(0, 1)->upper() }}
-                            </div>
+                            @if(Auth::user()->profile_photo)
+                                <img src="{{ asset('storage/' . Auth::user()->profile_photo) }}" alt="Profile" class="h-9 w-9 rounded-full object-cover border-2 border-gray-200">
+                            @else
+                                <div class="flex h-9 w-9 items-center justify-center rounded-full bg-violet-100 text-sm font-medium text-violet-700">
+                                    {{ Str::of(Auth::user()->name)->substr(0, 1)->upper() }}
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </header>

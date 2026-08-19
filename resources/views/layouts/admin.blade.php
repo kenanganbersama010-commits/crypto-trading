@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>Admin - {{ config('app.name', 'Laravel') }}</title>
+        <title>Admin - {{ \App\Models\SystemSetting::get('dashboard_name', 'Crypto Trading') }}</title>
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -76,13 +76,13 @@
             >
                 <div class="flex h-16 shrink-0 items-center justify-center overflow-hidden border-b border-violet-800 px-6">
                     <span class="whitespace-nowrap text-base font-semibold tracking-tight text-white" :class="sidebarCollapsed ? 'lg:hidden' : ''">
-                        {{ config('app.name', 'Crypto Trading') }}
+                        {{ \App\Models\SystemSetting::get('dashboard_name', 'Crypto Trading') }}
                     </span>
                     <div
                         class="hidden h-8 w-8 items-center justify-center rounded-full bg-violet-700 text-sm font-semibold text-white"
                         :class="sidebarCollapsed ? 'lg:flex' : ''"
                     >
-                        {{ Str::of(config('app.name', 'Crypto Trading'))->substr(0, 1)->upper() }}
+                        {{ Str::of(\App\Models\SystemSetting::get('dashboard_name', 'Crypto Trading'))->substr(0, 1)->upper() }}
                     </div>
                 </div>
 
@@ -189,9 +189,13 @@
                                 <p class="text-sm font-medium leading-tight text-gray-900">{{ Auth::user()->name }}</p>
                                 <p class="text-xs leading-tight text-gray-500">Admin</p>
                             </div>
-                            <div class="flex h-9 w-9 items-center justify-center rounded-full bg-violet-900 text-sm font-medium text-white">
-                                {{ Str::of(Auth::user()->name)->substr(0, 1)->upper() }}
-                            </div>
+                            @if(Auth::user()->profile_photo)
+                                <img src="{{ asset('storage/' . Auth::user()->profile_photo) }}" alt="Profile" class="h-9 w-9 rounded-full object-cover border-2 border-gray-200">
+                            @else
+                                <div class="flex h-9 w-9 items-center justify-center rounded-full bg-violet-900 text-sm font-medium text-white">
+                                    {{ Str::of(Auth::user()->name)->substr(0, 1)->upper() }}
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </header>
